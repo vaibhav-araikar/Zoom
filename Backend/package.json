@@ -4,12 +4,12 @@
   "description": "",
   "license": "ISC",
   "author": "Vaibhav Araikar",
-  "main": "index.js",
+  "main": "app.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/app.js",
-    "start": "node src/app.js",
-    "prod": "pm2 src/app.js"
+    "dev": "nodemon app.js",
+    "start": "node app.js",
+    "prod": "pm2 start app.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
