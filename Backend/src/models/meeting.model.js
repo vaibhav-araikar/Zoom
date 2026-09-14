@@ -33,3 +33,5 @@ const Meeting = mongoose.model("Meeting", meetingSchema);
 export { Meeting };
 
 // {Meeting} : ye hum tab use karenge jab hume ek file se bahot saari cheezein export karni ho, jaise ki {User, Meeting} ek hi file se export karna ho.
+
+// default se hum ek hi cheez ko export karte hai, jaise ki export default User; ya export default Meeting;
