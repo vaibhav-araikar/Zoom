@@ -25,12 +25,13 @@ app.use(cors());
 // we are using cors to tackle the cross origin issue, because our frontend and backend are running on different ports, so we need to allow the frontend to access the backend
 app.use(express.json({ limit: "40kb" }));
 app.use(express.urlencoded({ limit: "40kb", extended: true }));
+import userRoutes from "./src/routes/users.routes.js";
 
 app.get("/", (req, res) => {
   res.json({ message: "Server is running" });
 });
 
-app.use("/api", router);
+app.use("/api/v1/users", userRoutes);
 
 const start = async () => {
   const dbURL = process.env.MONGO_URL;

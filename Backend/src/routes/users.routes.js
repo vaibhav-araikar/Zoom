@@ -1,22 +1,16 @@
-import router from "express";
 import express from "express";
+import {
+  login,
+  register,
+  addToActivity,
+  getAllActivity,
+} from "../controllers/user.controller.js";
 
-const router = require("express").Router();
+const router = express.Router();
 
-router.route("/login").post((req, res) => {
-  // Login logic here
-});
-
-router.route("/register").post((req, res) => {
-  // Register logic here
-});
-
-router.route("/add_to_activity").post((req, res) => {
-  // Add to activity logic here
-});
-
-router.route("/get_all_activity").get((req, res) => {
-  // Get activity logic here
-});
+router.route("/login").post(login);
+router.route("/register").post(register);
+router.route("/add_to_activity").post(addToActivity);
+router.route("/get_all_activity").get(getAllActivity);
 
 export default router;
