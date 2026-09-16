@@ -43,3 +43,5 @@ const start = async () => {
 };
 
 start();
+
+// socket documentation read successfully
