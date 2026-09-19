@@ -57,7 +57,35 @@ const connectToSocketServer = (server) => {
       }
     });
 
-    socket.on("disconnect", () => {});
+    socket.on("disconnect", () => {
+      var diffTime = Math.abs(timeOnline[socket.id] - new Data());
+
+      var key;
+
+      for (const [k, v] of JSON.parse(
+        JSON.stringify(Object.entries(connections)),
+      )) {
+        // ab yaha hum ek deep banayenge kyuki humse vo wala data naa uud jaaye jise hame udana nahi hai
+        for (let a = 0; a < v.length; ++a) {
+          // user mil gaya hai
+          if (v[a] == socket.id) {
+            key = k;
+
+            for (let a = 0; a < connections[key].length; ++a) {
+              io.to(connections[key][a]).emit("user-left", socket.id);
+            }
+
+            var index = connections[key].indexOf(socket.id);
+            connections[key].splice(index, 1);
+
+            // agar user disconnect hote gaye hote gaye and uers ki length ek time 0 ho jayegi
+            if (connections[key].length === 0) {
+              delete connections[key];
+            }
+          }
+        }
+      }
+    });
   });
 
   return io;
