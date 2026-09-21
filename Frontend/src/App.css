@@ -26,11 +26,24 @@
   padding-inline: 1.2rem;
   padding-block: 1.6rem;
   display: flex;
+  /* display flex se options ek line me aayenge */
+  justify-content: space-between;
+  align-items: center;
 }
 
 .landingPageContainer nav h2 {
   font-size: 1.8rem;
   font-weight: 500;
+}
+
+.landingPageContainer nav .navList {
+  display: flex;
+  gap: 1.6rem;
+  cursor: pointer;
+}
+
+/* Main Page */
+.landingMainContainer > div:nth-child(1) {
 }
 
 /* .counter {
