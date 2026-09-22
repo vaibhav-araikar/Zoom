@@ -14,15 +14,13 @@ export default function Authentication() {
       <div className="auth-circle auth-circle-1"></div>
       <div className="auth-circle auth-circle-2"></div>
 
-      {/* Small dots */}
+      {/* Dot patterns */}
       <div className="auth-dots auth-dots-left"></div>
       <div className="auth-dots auth-dots-right"></div>
 
+      {/* Main content */}
       <main className="auth-container">
-        {/* Left side */}
         <Content />
-
-        {/* Right side */}
         <SignInCard />
       </main>
     </div>

@@ -8,12 +8,12 @@ export default function SignInCard() {
     e.preventDefault();
 
     console.log("Login submitted");
-    console.log("Remember:", rememberMe);
+    console.log("Remember me:", rememberMe);
   };
 
   return (
     <div className="signin-card">
-      {/* Card top glow */}
+      {/* Purple glow */}
       <div className="card-glow"></div>
 
       {/* Brand */}
@@ -77,7 +77,7 @@ export default function SignInCard() {
           </div>
         </div>
 
-        {/* Remember + forgot */}
+        {/* Remember / Forgot */}
         <div className="options-row">
           <label className="remember">
             <input
@@ -97,16 +97,13 @@ export default function SignInCard() {
         {/* Sign in */}
         <button type="submit" className="signin-button">
           <span className="signin-text">SIGN IN</span>
-
           <span className="signin-arrow">→</span>
         </button>
 
         {/* Divider */}
         <div className="divider">
           <span></span>
-
           <p>or</p>
-
           <span></span>
         </div>
 
@@ -117,7 +114,6 @@ export default function SignInCard() {
           onClick={() => console.log("Google login")}
         >
           <span className="google-icon">G</span>
-
           <span>CONTINUE WITH GOOGLE</span>
         </button>
 
@@ -128,7 +124,6 @@ export default function SignInCard() {
           onClick={() => console.log("Facebook login")}
         >
           <span className="facebook-icon">f</span>
-
           <span>CONTINUE WITH FACEBOOK</span>
         </button>
 

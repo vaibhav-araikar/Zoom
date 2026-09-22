@@ -40,7 +40,7 @@ export default function Content() {
         </div>
       </div>
 
-      {/* Heading */}
+      {/* Hero */}
       <div className="auth-hero">
         <div className="small-heading">VIDEO CALLING, REIMAGINED</div>
 
@@ -78,7 +78,7 @@ export default function Content() {
         })}
       </div>
 
-      {/* Bottom text */}
+      {/* Bottom message */}
       <div className="auth-bottom">
         <span></span>
 
