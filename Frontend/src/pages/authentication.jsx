@@ -1,13 +1,13 @@
 import CssBaseline from "@mui/material/CssBaseline";
 import Stack from "@mui/material/Stack";
-import SignInCard from "./components/SignInCard";
+import SignInCard from "./components/SignIn";
 import Content from "./components/Content";
+import AppTheme from "../shared-theme/AppTheme";
 
-export default function Authentication() {
+export default function Authentication(props) {
   return (
-    <>
-      <CssBaseline />
-
+    <AppTheme {...props}>
+      <CssBaseline enableColorScheme />
       <Stack
         direction="column"
         component="main"
@@ -16,7 +16,6 @@ export default function Authentication() {
           minHeight: "100vh",
           position: "relative",
           overflow: "hidden",
-
           "&::before": {
             content: '""',
             display: "block",
@@ -42,10 +41,9 @@ export default function Authentication() {
           }}
         >
           <Content />
-
           <SignInCard />
         </Stack>
       </Stack>
-    </>
+    </AppTheme>
   );
 }
