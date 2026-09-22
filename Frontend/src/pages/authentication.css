@@ -797,6 +797,11 @@
   transition: 0.2s;
 }
 
+.signin-text {
+  font-size: 0.9rem;
+  margin-left: 1.5rem;
+}
+
 .signin-button:hover {
   transform: translateY(-1px);
 
@@ -812,7 +817,7 @@
 
   margin-right: 15px;
 
-  font-size: 18px;
+  font-size: 25px;
 }
 
 /* =========================================================

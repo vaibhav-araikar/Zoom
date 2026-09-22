@@ -96,7 +96,7 @@ export default function SignInCard() {
 
         {/* Sign in */}
         <button type="submit" className="signin-button">
-          <span>SIGN IN</span>
+          <span className="signin-text">SIGN IN</span>
 
           <span className="signin-arrow">→</span>
         </button>
