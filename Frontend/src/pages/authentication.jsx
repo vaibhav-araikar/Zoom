@@ -1,49 +1,30 @@
-import CssBaseline from "@mui/material/CssBaseline";
-import Stack from "@mui/material/Stack";
-import SignInCard from "./components/SignIn";
+import "./authentication.css";
 import Content from "./components/Content";
-import AppTheme from "../shared-theme/AppTheme";
+import SignInCard from "./components/SignIn";
 
-export default function Authentication(props) {
+export default function Authentication() {
   return (
-    <AppTheme {...props}>
-      <CssBaseline enableColorScheme />
-      <Stack
-        direction="column"
-        component="main"
-        sx={{
-          justifyContent: "center",
-          minHeight: "100vh",
-          position: "relative",
-          overflow: "hidden",
-          "&::before": {
-            content: '""',
-            display: "block",
-            position: "absolute",
-            zIndex: -1,
-            inset: 0,
-            backgroundImage:
-              "radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))",
-            backgroundRepeat: "no-repeat",
-          },
-        }}
-      >
-        <Stack
-          direction={{ xs: "column-reverse", md: "row" }}
-          sx={{
-            justifyContent: "center",
-            alignItems: "center",
-            gap: { xs: 6, sm: 12 },
-            p: { xs: 2, sm: 4 },
-            m: "auto",
-            width: "100%",
-            maxWidth: "1200px",
-          }}
-        >
-          <Content />
-          <SignInCard />
-        </Stack>
-      </Stack>
-    </AppTheme>
+    <div className="auth-page">
+      {/* Background glow */}
+      <div className="auth-glow auth-glow-orange"></div>
+      <div className="auth-glow auth-glow-purple"></div>
+      <div className="auth-glow auth-glow-blue"></div>
+
+      {/* Decorative circles */}
+      <div className="auth-circle auth-circle-1"></div>
+      <div className="auth-circle auth-circle-2"></div>
+
+      {/* Small dots */}
+      <div className="auth-dots auth-dots-left"></div>
+      <div className="auth-dots auth-dots-right"></div>
+
+      <main className="auth-container">
+        {/* Left side */}
+        <Content />
+
+        {/* Right side */}
+        <SignInCard />
+      </main>
+    </div>
   );
 }

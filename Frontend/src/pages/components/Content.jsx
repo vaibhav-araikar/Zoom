@@ -1,58 +1,93 @@
-import * as React from "react";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
-import ThumbUpAltRoundedIcon from "@mui/icons-material/ThumbUpAltRounded";
-import { SitemarkIcon } from "./CustomIcons";
+import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
+import BoltRoundedIcon from "@mui/icons-material/BoltRounded";
 
-const items = [
+const features = [
   {
-    icon: <SecurityRoundedIcon sx={{ color: "text.secondary" }} />,
+    Icon: SecurityRoundedIcon,
     title: "Secure by design",
     description:
-      "Your data is protected with industry-standard encryption and best practices.",
+      "Your conversations are protected with secure and reliable technology.",
+    className: "orange-feature",
   },
   {
-    icon: <ThumbUpAltRoundedIcon sx={{ color: "text.secondary" }} />,
-    title: "Reliable performance",
+    Icon: GroupsRoundedIcon,
+    title: "Connect with everyone",
     description:
-      "Enjoy a smooth, dependable experience every time you sign in.",
+      "Stay connected with friends, family, and teams from anywhere.",
+    className: "purple-feature",
   },
   {
-    icon: <LoginRoundedIcon sx={{ color: "text.secondary" }} />,
-    title: "Quick access",
+    Icon: BoltRoundedIcon,
+    title: "Fast & reliable",
     description:
-      "Get back into your account in seconds with a simple, familiar flow.",
+      "Enjoy smooth and dependable video calling whenever you need it.",
+    className: "blue-feature",
   },
 ];
 
 export default function Content() {
   return (
-    <Stack
-      sx={{
-        flexDirection: "column",
-        alignSelf: "center",
-        gap: 4,
-        maxWidth: 450,
-      }}
-    >
-      <Stack direction="row" sx={{ justifyContent: "flex-start" }}>
-        <SitemarkIcon />
-      </Stack>
-      {items.map((item, index) => (
-        <Stack key={index} direction="row" sx={{ gap: 2 }}>
-          {item.icon}
-          <div>
-            <Typography gutterBottom sx={{ fontWeight: "medium" }}>
-              {item.title}
-            </Typography>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              {item.description}
-            </Typography>
-          </div>
-        </Stack>
-      ))}
-    </Stack>
+    <section className="auth-content">
+      {/* Brand */}
+      <div className="auth-brand">
+        <div className="camera-logo">
+          <div className="camera-lens"></div>
+        </div>
+
+        <div className="brand-name">
+          Air <span>Video Call</span>
+        </div>
+      </div>
+
+      {/* Heading */}
+      <div className="auth-hero">
+        <div className="small-heading">VIDEO CALLING, REIMAGINED</div>
+
+        <h1>
+          Stay connected
+          <br />
+          <span>no matter the distance.</span>
+        </h1>
+
+        <p>
+          High-quality video calls made simple.
+          <br />
+          Connect with the people who matter most.
+        </p>
+      </div>
+
+      {/* Features */}
+      <div className="auth-features">
+        {features.map((feature) => {
+          const Icon = feature.Icon;
+
+          return (
+            <div className="auth-feature" key={feature.title}>
+              <div className={`feature-icon ${feature.className}`}>
+                <Icon />
+              </div>
+
+              <div className="feature-text">
+                <h3>{feature.title}</h3>
+
+                <p>{feature.description}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Bottom text */}
+      <div className="auth-bottom">
+        <span></span>
+
+        <p>
+          Better conversations.
+          <br />
+          <strong>Closer connections.</strong>
+        </p>
+      </div>
+    </section>
   );
 }
