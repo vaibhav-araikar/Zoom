@@ -1,4 +1,9 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import ForgotPassword from "./ForgotPassword";
 
 export default function SignInCard() {
   const [showPassword, setShowPassword] = useState(false);
@@ -72,7 +77,7 @@ export default function SignInCard() {
               className="password-toggle"
               onClick={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? "◉" : "◌"}
+              {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
             </button>
           </div>
         </div>
@@ -89,14 +94,16 @@ export default function SignInCard() {
             <span>Remember me</span>
           </label>
 
-          <a href="#" onClick={(e) => e.preventDefault()}>
+          {/* Forgot Password */}
+          <Link to="/forgot-password" className="forgot-password-link">
             Forgot password?
-          </a>
+          </Link>
         </div>
 
         {/* Sign in */}
         <button type="submit" className="signin-button">
           <span className="signin-text">SIGN IN</span>
+
           <span className="signin-arrow">→</span>
         </button>
 
@@ -114,6 +121,7 @@ export default function SignInCard() {
           onClick={() => console.log("Google login")}
         >
           <span className="google-icon">G</span>
+
           <span>CONTINUE WITH GOOGLE</span>
         </button>
 
@@ -124,15 +132,14 @@ export default function SignInCard() {
           onClick={() => console.log("Facebook login")}
         >
           <span className="facebook-icon">f</span>
+
           <span>CONTINUE WITH FACEBOOK</span>
         </button>
 
         {/* Signup */}
         <div className="signup-text">
           Don't have an account?
-          <a href="#" onClick={(e) => e.preventDefault()}>
-            Sign up
-          </a>
+          <Link to="/register">Sign up</Link>
         </div>
       </form>
     </div>
