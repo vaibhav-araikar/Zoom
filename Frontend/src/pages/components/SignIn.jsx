@@ -3,15 +3,20 @@ import { Link } from "react-router-dom";
 
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import ForgotPassword from "./ForgotPassword";
 
 export default function SignInCard() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [userName, setUserName] = useState(false);
-  const [error, setError] = useState(false);
-  const [name, setName] = useState(false);
-  const [messages, setMessages] = useState(false);
+  const [password, setPassword] = useState();
+  const [userName, setUserName] = useState();
+  const [error, setError] = useState();
+  const [name, setName] = useState();
+  const [messages, setMessages] = useState();
+
+  const [formState, setFormState] = useState(0);
+
+  // snackbar is open or not
+  const [open, setOpen] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
