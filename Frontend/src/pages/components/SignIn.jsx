@@ -8,6 +8,10 @@ import ForgotPassword from "./ForgotPassword";
 export default function SignInCard() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [userName, setUserName] = useState(false);
+  const [error, setError] = useState(false);
+  const [name, setName] = useState(false);
+  const [messages, setMessages] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
