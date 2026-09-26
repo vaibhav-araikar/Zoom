@@ -32,6 +32,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const handleLogin = async (username, password) => {
+    try {
+      let request = await client.post("/login", {
+        username: username,
+        password: password,
+      });
+
+      if (request.status === HttpStatusCode.Ok) {
+        localStorage.setItem("token", request.data.token);
+      }
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
   const data = {
     userData,
     setUserData,
@@ -41,3 +57,5 @@ export const AuthProvider = ({ children }) => {
 
   return <AuthContext.Provider value={data}>{children}</AuthContext.Provider>;
 };
+
+// AuthContext.jsx is a React Context file that stores your application's authentication-related data and functions in one place.
