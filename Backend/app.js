@@ -20,6 +20,7 @@ const server = createServer(app);
 const io = connectToSocketServer(server);
 // jab hum server chalayenge tab usme hamara app and io dono honga
 
+// Middleware
 app.set("port", process.env.PORT || 5000);
 app.use(cors());
 // we are using cors to tackle the cross origin issue, because our frontend and backend are running on different ports, so we need to allow the frontend to access the backend
@@ -31,15 +32,32 @@ app.get("/", (req, res) => {
   res.json({ message: "Server is running" });
 });
 
-app.use("/api/v1/users", userRoutes);
+// User routes
+app.use("/api/v1/users", router);
 
+// Start server
 const start = async () => {
-  const dbURL = process.env.MONGO_URL;
-  await mongoose.connect(dbURL);
+  try {
+    await mongoose.connect(process.env.MONGO_URL);
 
-  server.listen(app.get("port"), () => {
-    console.log(`Server is running on port ${app.get("port")}`);
-  });
+    // console.log("MongoDB connected successfully");
+    // const test = await mongoose.connection.db.collection("users").insertOne({
+    //   name: "Mongo Test",
+    //   username: `test_${Date.now()}`,
+    //   password: "test",
+    //   activity: [],
+    // });
+
+    // console.log("TEST USER INSERTED:", test.insertedId);
+
+    console.log("MongoDB connected successfully");
+
+    server.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Server startup error:", error);
+  }
 };
 
 start();

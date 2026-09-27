@@ -1,31 +1,36 @@
 import mongoose, { Schema } from "mongoose";
 
-const userSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-  },
+const userSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
 
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-  },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
 
-  password: {
-    type: String,
-    required: true,
-  },
+    password: {
+      type: String,
+      required: true,
+    },
 
-  token: {
-    type: String,
-  },
+    token: {
+      type: String,
+    },
 
-  activity: {
-    type: [String],
-    default: [],
+    activity: {
+      type: [String],
+      default: [],
+    },
   },
-});
+  {
+    timestamps: true,
+  },
+);
 
 const User = mongoose.model("User", userSchema);
 
