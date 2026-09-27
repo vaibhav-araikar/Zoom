@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Button from "@mui/material/Button";
@@ -8,10 +8,13 @@ import TextField from "@mui/material/TextField";
 import VideocamRoundedIcon from "@mui/icons-material/VideocamRounded";
 
 import { GoogleIcon, FacebookIcon } from "./CustomIcons";
+import { AuthContext } from "../../contexts/AuthContext";
 
 import "./SignUp.css";
 
 export default function SignUp() {
+  const { handleRegister } = useContext(AuthContext);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,10 +23,9 @@ export default function SignUp() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Clear previous errors
     setNameError("");
     setEmailError("");
     setPasswordError("");
@@ -58,21 +60,35 @@ export default function SignUp() {
       return;
     }
 
-    console.log("Signup submitted:", {
-      name,
-      email,
-      password,
-    });
+    try {
+      console.log("Sending registration request...");
+
+      const result = await handleRegister(name, email, password);
+
+      console.log("Registration successful:", result);
+
+      alert("Account created successfully!");
+
+      setName("");
+      setEmail("");
+      setPassword("");
+    } catch (error) {
+      console.error("Registration failed:", error);
+
+      const message =
+        error.response?.data?.message ||
+        "Registration failed. Please try again.";
+
+      setEmailError(message);
+    }
   };
 
   return (
     <div className="signup-page">
-      {/* Background effects */}
       <div className="signup-glow signup-glow-orange"></div>
       <div className="signup-glow signup-glow-purple"></div>
       <div className="signup-glow signup-glow-blue"></div>
 
-      {/* Decorative circles */}
       <div className="signup-circle signup-circle-1"></div>
       <div className="signup-circle signup-circle-2"></div>
 
@@ -167,7 +183,7 @@ export default function SignUp() {
           {/* Checkbox */}
           <FormControlLabel
             className="signup-checkbox"
-            control={<Checkbox value="allowExtraEmails" />}
+            control={<Checkbox />}
             label="I want to receive updates via email."
           />
 

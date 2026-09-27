@@ -1,6 +1,5 @@
 import { createContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios, { HttpStatusCode } from "axios";
+import axios from "axios";
 
 export const AuthContext = createContext(null);
 
@@ -11,39 +10,46 @@ const clientUrl = axios.create({
 export const AuthProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
 
-  const router = useNavigate();
-
-  const handleRegister = async (name, username, password) => {
+  const handleRegister = async (name, email, password) => {
     try {
-      const request = await clientUrl.post("/register", {
+      console.log("Sending to backend:", {
         name,
-        username,
+        email,
         password,
       });
 
-      if (request.status === HttpStatusCode.Created) {
-        return request.data.message;
-      }
+      const response = await clientUrl.post("/register", {
+        name,
+        username: email,
+        password,
+      });
 
-      return request.data;
+      console.log("Backend response:", response.data);
+
+      return response.data.message;
     } catch (error) {
-      console.log("Registration error:", error);
+      console.error("Registration API error:", error);
+      console.error("Backend error:", error.response?.data);
+
       throw error;
     }
   };
 
-  const handleLogin = async (username, password) => {
+  const handleLogin = async (email, password) => {
     try {
-      let request = await client.post("/login", {
-        username: username,
-        password: password,
+      const response = await clientUrl.post("/login", {
+        username: email,
+        password,
       });
 
-      if (request.status === HttpStatusCode.Ok) {
-        localStorage.setItem("token", request.data.token);
-      }
+      console.log("Login response:", response.data);
+
+      localStorage.setItem("token", response.data.token);
+
+      return response.data;
     } catch (error) {
-      console.log(error);
+      console.error("Login API error:", error);
+
       throw error;
     }
   };
@@ -52,7 +58,7 @@ export const AuthProvider = ({ children }) => {
     userData,
     setUserData,
     handleRegister,
-    router,
+    handleLogin,
   };
 
   return <AuthContext.Provider value={data}>{children}</AuthContext.Provider>;

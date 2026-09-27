@@ -10,12 +10,20 @@ export default function LandingPage() {
         <div className="navHeader">
           <h2>Air Video Call</h2>
         </div>
+
         <div className="navList">
           <p>Join as Guest</p>
-          <p>Register</p>
-          <div role="button">
+
+          <Link
+            to="/register"
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            <p>Register</p>
+          </Link>
+
+          <Link to="/auth" style={{ textDecoration: "none", color: "inherit" }}>
             <p>Login</p>
-          </div>
+          </Link>
         </div>
       </nav>
 

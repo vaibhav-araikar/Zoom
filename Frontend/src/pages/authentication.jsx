@@ -1,6 +1,8 @@
 import React from "react";
 import "./authentication.css";
 
+import Snackbar from "@mui/material/Snackbar";
+
 import Content from "./components/Content";
 import SignInCard from "./components/SignIn";
 
@@ -45,9 +47,10 @@ export default function Authentication() {
     } catch (err) {
       console.log(err);
 
-      const message = err.response?.data?.message || "Something went wrong";
+      const errorMessage =
+        err.response?.data?.message || "Something went wrong";
 
-      setError(message);
+      setError(errorMessage);
     }
   };
 
@@ -81,6 +84,14 @@ export default function Authentication() {
           setFormState={setFormState}
         />
       </main>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={open}
+        autoHideDuration={4000}
+        message={message}
+        onClose={() => setOpen(false)}
+      />
     </div>
   );
 }
