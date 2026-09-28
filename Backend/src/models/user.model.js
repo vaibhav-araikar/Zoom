@@ -35,3 +35,5 @@ const userSchema = new Schema(
 const User = mongoose.model("User", userSchema);
 
 export { User };
+
+// Date and time of creation account is now added
