@@ -5,6 +5,7 @@ import Authentication from "./pages/authentication";
 import ForgotPassword from "./pages/components/ForgotPassword";
 import SignUp from "./pages/components/SignUp";
 import { AuthProvider } from "./contexts/AuthContext";
+import VideoMeetComponent from "./pages/VideoMeet";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/auth" element={<Authentication />}></Route>
           <Route path="/forgot-password" element={<ForgotPassword />}></Route>
           <Route path="/register" element={<SignUp />}></Route>
+          <Route path="/:url" element={<VideoMeetComponent />}></Route>
         </Routes>
       </AuthProvider>
     </Router>
