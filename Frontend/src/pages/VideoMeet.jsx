@@ -41,3 +41,4 @@ export default function VideoMeetComponent() {
 }
 
 // STUN Server = Tumhara public IP aur port bata kar direct P2P connection establish karne mein help karta hai.
+// Todo: Video section is still pending
