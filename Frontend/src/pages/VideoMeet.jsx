@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import "./VideoMeet.css";
 
 const server_url = "http://localhost:5173/";
 
@@ -26,7 +27,7 @@ export default function VideoMeetComponent() {
   let [msg, setMsg] = useState("");
   let [newMessages, setNewMessages] = useState(0);
   //   jab bhi koi guest se login karega tab hum askforusername wala variable use krenge
-  let [askForUsername, setUsername] = useState(true);
+  let [askForUsername, setAskForUsername] = useState(true);
   let [username, setUsername] = useState();
   let [videos, setVideos] = useState([]);
 
@@ -36,7 +37,7 @@ export default function VideoMeetComponent() {
   // if (isChrome() === false) {
   // }
 
-  return <div>VideoMeetComponent</div>;
+  return <div>{askForUsername === true ? <div></div> : <></>}</div>;
 }
 
 // STUN Server = Tumhara public IP aur port bata kar direct P2P connection establish karne mein help karta hai.
