@@ -37,7 +37,17 @@ export default function VideoMeetComponent() {
   // if (isChrome() === false) {
   // }
 
-  return <div>{askForUsername === true ? <div></div> : <></>}</div>;
+  return (
+    <div>
+      {askForUsername === true ? (
+        <div>
+          <h2>Enter into lobby</h2>
+        </div>
+      ) : (
+        <></>
+      )}
+    </div>
+  );
 }
 
 // STUN Server = Tumhara public IP aur port bata kar direct P2P connection establish karne mein help karta hai.
