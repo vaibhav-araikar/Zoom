@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button, TextField } from "@mui/material";
 import "./VideoMeet.css";
 
@@ -38,32 +38,114 @@ export default function VideoMeetComponent() {
   // if (isChrome() === false) {
   // }
 
-  return (
-    <div>
-      {askForUsername === true ? (
-        <div>
-          <h2>Enter into lobby</h2>
-          {/* {username} */}
-          <TextField
-            id="outlined-basic"
-            label="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            variant="outlined"
-          />
-          <Button variant="contained" onClick={() => setAskForUsername(false)}>
-            Connect
-          </Button>
+  const getPermission = async () => {
+    try {
+      // video permission
+      const videoPermission = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      });
+      if (videoPermission) {
+        setVideoAvailable(true);
+      } else {
+        setVideoAvailable(false);
+      }
 
+      // audio permission
+      const audioPermission = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+      if (audioPermission) {
+        setAudioAvailable(true);
+      } else {
+        setAudioAvailable(false);
+      }
+
+      // screen share
+      if (navigator.mediaDevices.getDisplayMedia) {
+        setScreenAvailable(true);
+      } else {
+        setScreenAvailable(false);
+      }
+
+      if (videoAvailable || audioAvailable) {
+        const userMediaStream = await navigator.mediaDevices.getUserMedia({
+          video: videoAvailable,
+          audio: audioAvailable,
+        });
+
+        if (userMediaStream) {
+          window.localStream = userMediaStream;
+          if (localVideoRef.current) {
+            localVideoRef.current.srcObject = userMediaStream;
+          }
+        }
+      }
+    } catch (err) {
+      console.log("err", err);
+    }
+  };
+
+  let getUserMedia = async () => {
+    if ((video && videoAvailable) || (audio && audioAvailable)) {
+      const userMediaStream = await navigator.mediaDevices
+        .getUserMedia({
+          video: video,
+          audio: audio,
+        })
+        .then(() => {}) //Todo: get user media success
+        .then((stream) => {})
+        .catch((err) => {
+          console.log("err", err);
+        });
+    }
+
+    useEffect(() => {
+      getPermission();
+    }, []);
+
+    useEffect(() => {
+      if (video !== undefined && audio !== undefined) {
+        getUserMedia();
+      }
+    }, [video, audio]);
+
+    let getMedia = () => {
+      setVideo(videoAvailable);
+      setAudio(audioAvailable);
+      connectToSocketServer();
+    };
+
+    let connect = () => {
+      setAskForUsername(false);
+      getMedia();
+    };
+
+    return (
+      <div>
+        {askForUsername === true ? (
           <div>
-            <video ref={localVideoRef} autoPlay muted></video>
-          </div>
-        </div>
-      ) : (
-        <></>
-      )}
-    </div>
-  );
-}
+            <h2>Enter into lobby</h2>
+            {/* {username} */}
+            <TextField
+              id="outlined-basic"
+              label="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              variant="outlined"
+            />
+            <Button variant="contained" onClick={connect}>
+              Connect
+            </Button>
 
+            <div>
+              <video ref={localVideoRef} autoPlay muted></video>
+            </div>
+          </div>
+        ) : (
+          <></>
+        )}
+      </div>
+    );
+  };
+}
 // STUN Server = Tumhara public IP aur port bata kar direct P2P connection establish karne mein help karta hai.
