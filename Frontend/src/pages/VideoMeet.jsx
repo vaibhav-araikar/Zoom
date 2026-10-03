@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { Button, TextField } from "@mui/material";
 import "./VideoMeet.css";
 
 const server_url = "http://localhost:5173/";
@@ -42,6 +43,21 @@ export default function VideoMeetComponent() {
       {askForUsername === true ? (
         <div>
           <h2>Enter into lobby</h2>
+          {/* {username} */}
+          <TextField
+            id="outlined-basic"
+            label="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            variant="outlined"
+          />
+          <Button variant="contained" onClick={() => setAskForUsername(false)}>
+            Connect
+          </Button>
+
+          <div>
+            <video ref={localVideoRef} autoPlay muted></video>
+          </div>
         </div>
       ) : (
         <></>
