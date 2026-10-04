@@ -7,145 +7,201 @@ const server_url = "http://localhost:5173/";
 var connections = {};
 
 const peerConfigConnections = {
-  iceServers: [{ urls: "stun.stun.l.google.com:19302" }],
+  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 };
 
 export default function VideoMeetComponent() {
-  var socketRef = useRef();
-  var socketIdRef = useRef();
-  let localVideoRef = useRef();
+  const socketRef = useRef();
+  const socketIdRef = useRef();
+  const localVideoRef = useRef(null);
 
-  let [videoAvailable, setVideoAvailable] = useState(true);
-  let [audioAvailable, setAudioAvailable] = useState(true);
+  const [videoAvailable, setVideoAvailable] = useState(true);
+  const [audioAvailable, setAudioAvailable] = useState(true);
 
-  let [video, setVideo] = useState();
-  let [audio, setAudio] = useState();
-  let [screen, setScreen] = useState();
+  const [video, setVideo] = useState(true);
+  const [audio, setAudio] = useState(true);
 
-  let [showModel, setModel] = useState();
-  let [screenAvailable, setScreenAvailable] = useState();
-  let [messages, setMessages] = useState();
-  let [msg, setMsg] = useState("");
-  let [newMessages, setNewMessages] = useState(0);
-  //   jab bhi koi guest se login karega tab hum askforusername wala variable use krenge
-  let [askForUsername, setAskForUsername] = useState(true);
-  let [username, setUsername] = useState();
-  let [videos, setVideos] = useState([]);
+  const [screenAvailable, setScreenAvailable] = useState(false);
 
-  const videoRef = useRef([]);
+  const [askForUsername, setAskForUsername] = useState(true);
+  const [username, setUsername] = useState("");
 
-  // isChrome hum iss liye use kr rhe hai kyuki webrtc sirf chromium based browser ko support krta hai
-  // if (isChrome() === false) {
-  // }
+  // =====================================
+  // GET PERMISSION
+  // =====================================
 
   const getPermission = async () => {
     try {
-      // video permission
-      const videoPermission = await navigator.mediaDevices.getUserMedia({
-        video: true,
-      });
-      if (videoPermission) {
-        setVideoAvailable(true);
-      } else {
-        setVideoAvailable(false);
-      }
+      console.log("Requesting camera and microphone permission...");
 
-      // audio permission
-      const audioPermission = await navigator.mediaDevices.getUserMedia({
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
         audio: true,
       });
-      if (audioPermission) {
-        setAudioAvailable(true);
-      } else {
-        setAudioAvailable(false);
+
+      console.log("Permission granted");
+      console.log("Stream:", stream);
+
+      // Save stream
+      window.localStream = stream;
+
+      setVideoAvailable(true);
+      setAudioAvailable(true);
+
+      // Show video
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
       }
 
-      // screen share
+      // Screen sharing
       if (navigator.mediaDevices.getDisplayMedia) {
         setScreenAvailable(true);
+      }
+    } catch (error) {
+      console.error("Camera/Microphone permission error:", error);
+
+      setVideoAvailable(false);
+      setAudioAvailable(false);
+    }
+  };
+
+  // =====================================
+  // GET USER MEDIA
+  // =====================================
+
+  const getUserMedia = async () => {
+    try {
+      console.log("Getting user media...");
+
+      // Stop previous stream
+      if (window.localStream) {
+        window.localStream.getTracks().forEach((track) => {
+          track.stop();
+        });
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: video && videoAvailable,
+        audio: audio && audioAvailable,
+      });
+
+      console.log("New stream:", stream);
+
+      window.localStream = stream;
+
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+
+        console.log("Video attached successfully");
       } else {
-        setScreenAvailable(false);
+        console.log("Video element not found");
       }
-
-      if (videoAvailable || audioAvailable) {
-        const userMediaStream = await navigator.mediaDevices.getUserMedia({
-          video: videoAvailable,
-          audio: audioAvailable,
-        });
-
-        if (userMediaStream) {
-          window.localStream = userMediaStream;
-          if (localVideoRef.current) {
-            localVideoRef.current.srcObject = userMediaStream;
-          }
-        }
-      }
-    } catch (err) {
-      console.log("err", err);
+    } catch (error) {
+      console.error("Error getting user media:", error);
     }
   };
 
-  let getUserMedia = async () => {
-    if ((video && videoAvailable) || (audio && audioAvailable)) {
-      const userMediaStream = await navigator.mediaDevices
-        .getUserMedia({
-          video: video,
-          audio: audio,
-        })
-        .then(() => {}) //Todo: get user media success
-        .then((stream) => {})
-        .catch((err) => {
-          console.log("err", err);
-        });
+  // =====================================
+  // REQUEST PERMISSION WHEN COMPONENT LOADS
+  // =====================================
+
+  useEffect(() => {
+    getPermission();
+  }, []);
+
+  // =====================================
+  // UPDATE MEDIA WHEN VIDEO/AUDIO CHANGES
+  // =====================================
+
+  useEffect(() => {
+    if (video !== undefined && audio !== undefined) {
+      getUserMedia();
     }
+  }, [video, audio]);
 
-    useEffect(() => {
-      getPermission();
-    }, []);
+  // =====================================
+  // GET MEDIA
+  // =====================================
 
-    useEffect(() => {
-      if (video !== undefined && audio !== undefined) {
-        getUserMedia();
-      }
-    }, [video, audio]);
+  const getMedia = () => {
+    setVideo(videoAvailable);
+    setAudio(audioAvailable);
+  };
 
-    let getMedia = () => {
-      setVideo(videoAvailable);
-      setAudio(audioAvailable);
-      connectToSocketServer();
-    };
+  // =====================================
+  // CONNECT
+  // =====================================
 
-    let connect = () => {
-      setAskForUsername(false);
-      getMedia();
-    };
+  const connect = () => {
+    console.log("Connect button clicked");
 
-    return (
-      <div>
-        {askForUsername === true ? (
+    getMedia();
+
+    // Don't hide video for now
+    setAskForUsername(false);
+  };
+
+  // =====================================
+  // COMPONENT
+  // =====================================
+
+  return (
+    <div>
+      {askForUsername ? (
+        <div>
+          <h2>Enter into lobby</h2>
+
+          <TextField
+            id="outlined-basic"
+            label="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            variant="outlined"
+          />
+
+          <Button variant="contained" onClick={connect}>
+            Connect
+          </Button>
+
           <div>
-            <h2>Enter into lobby</h2>
-            {/* {username} */}
-            <TextField
-              id="outlined-basic"
-              label="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              variant="outlined"
+            <video
+              ref={localVideoRef}
+              autoPlay
+              muted
+              playsInline
+              style={{
+                width: "400px",
+                height: "300px",
+                backgroundColor: "black",
+                objectFit: "cover",
+              }}
             />
-            <Button variant="contained" onClick={connect}>
-              Connect
-            </Button>
-
-            <div>
-              <video ref={localVideoRef} autoPlay muted></video>
-            </div>
           </div>
-        ) : (
-          <></>
-        )}
-      </div>
-    );
-  };
+        </div>
+      ) : (
+        <div>
+          <h2>Welcome {username}</h2>
+
+          <video
+            ref={localVideoRef}
+            autoPlay
+            muted
+            playsInline
+            style={{
+              width: "500px",
+              height: "350px",
+              backgroundColor: "black",
+              objectFit: "cover",
+            }}
+          />
+
+          <br />
+
+          <Button variant="contained" onClick={() => setAskForUsername(true)}>
+            Back
+          </Button>
+        </div>
+      )}
+    </div>
+  );
 }
-// STUN Server = Tumhara public IP aur port bata kar direct P2P connection establish karne mein help karta hai.
