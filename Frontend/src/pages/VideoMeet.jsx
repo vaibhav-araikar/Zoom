@@ -65,143 +65,180 @@ export default function VideoMeetComponent() {
     }
   };
 
-  // =====================================
-  // GET USER MEDIA
-  // =====================================
+  // Todo
+  let gotMessageFromServer = (fromId, message) => {
+    console.log("Got message from server:", message);
+  };
 
-  const getUserMedia = async () => {
-    try {
-      console.log("Getting user media...");
+  // Todo
+  let addMessageToChat = () => {
+    console.log("New chat message received");
+  };
 
-      // Stop previous stream
-      if (window.localStream) {
-        window.localStream.getTracks().forEach((track) => {
-          track.stop();
-        });
-      }
+  let connectToSocketServer = (server) => {
+    socketRef.current = io.connect(server_url, { secure: false });
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: video && videoAvailable,
-        audio: audio && audioAvailable,
+    socketRef.current.on("signal", gotMessageFromServer);
+
+    // jab vaha se emit hoga ki kisi ne join kiya to ye chalega
+    socketRef.current.on("connect", () => {
+      socketRef.current.emit("join-call", window.location.href);
+      socketIdRef.current = socketRef.current.id;
+      socketRef.current.on("chat-message", addMessageToChat);
+      console.log("Connected to socket server:", socketRef.current.id);
+      socketRef.current.on("user-left", (id) => {
+        setVideo((videos) => videos.filter((video) => video.id !== id));
+        console.log("User left :", id);
       });
 
-      console.log("New stream:", stream);
+      socketRef.current.on("user-joined", (id, clients) => {
+        clients.forEach((socketListId) => {
+          // creating new peer connection for each client
+          connections[socketListId] = new RTCPeerConnection(
+            peerConfigConnections,
+          );
+        });
+      });
+    });
 
-      window.localStream = stream;
+    // =====================================
+    // GET USER MEDIA
+    // =====================================
 
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = stream;
+    const getUserMedia = async () => {
+      try {
+        console.log("Getting user media...");
 
-        console.log("Video attached successfully");
-      } else {
-        console.log("Video element not found");
+        // Stop previous stream
+        if (window.localStream) {
+          window.localStream.getTracks().forEach((track) => {
+            track.stop();
+          });
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: video && videoAvailable,
+          audio: audio && audioAvailable,
+        });
+
+        console.log("New stream:", stream);
+
+        window.localStream = stream;
+
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = stream;
+
+          console.log("Video attached successfully");
+        } else {
+          console.log("Video element not found");
+        }
+      } catch (error) {
+        console.error("Error getting user media:", error);
       }
-    } catch (error) {
-      console.error("Error getting user media:", error);
-    }
-  };
+    };
 
-  // =====================================
-  // REQUEST PERMISSION WHEN COMPONENT LOADS
-  // =====================================
+    // =====================================
+    // REQUEST PERMISSION WHEN COMPONENT LOADS
+    // =====================================
 
-  useEffect(() => {
-    getPermission();
-  }, []);
+    useEffect(() => {
+      getPermission();
+    }, []);
 
-  // =====================================
-  // UPDATE MEDIA WHEN VIDEO/AUDIO CHANGES
-  // =====================================
+    // =====================================
+    // UPDATE MEDIA WHEN VIDEO/AUDIO CHANGES
+    // =====================================
 
-  useEffect(() => {
-    if (video !== undefined && audio !== undefined) {
-      getUserMedia();
-    }
-  }, [video, audio]);
+    useEffect(() => {
+      if (video !== undefined && audio !== undefined) {
+        getUserMedia();
+      }
+    }, [video, audio]);
 
-  // =====================================
-  // GET MEDIA
-  // =====================================
+    // =====================================
+    // GET MEDIA
+    // =====================================
 
-  const getMedia = () => {
-    setVideo(videoAvailable);
-    setAudio(audioAvailable);
-  };
+    const getMedia = () => {
+      setVideo(videoAvailable);
+      setAudio(audioAvailable);
+    };
 
-  // =====================================
-  // CONNECT
-  // =====================================
+    // =====================================
+    // CONNECT
+    // =====================================
 
-  const connect = () => {
-    console.log("Connect button clicked");
+    const connect = () => {
+      console.log("Connect button clicked");
 
-    getMedia();
+      getMedia();
 
-    // Don't hide video for now
-    setAskForUsername(false);
-  };
+      // Don't hide video for now
+      setAskForUsername(false);
+    };
 
-  // =====================================
-  // COMPONENT
-  // =====================================
+    // =====================================
+    // COMPONENT
+    // =====================================
 
-  return (
-    <div>
-      {askForUsername ? (
-        <div>
-          <h2>Enter into lobby</h2>
-
-          <TextField
-            id="outlined-basic"
-            label="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            variant="outlined"
-          />
-
-          <Button variant="contained" onClick={connect}>
-            Connect
-          </Button>
-
+    return (
+      <div>
+        {askForUsername ? (
           <div>
+            <h2>Enter into lobby</h2>
+
+            <TextField
+              id="outlined-basic"
+              label="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              variant="outlined"
+            />
+
+            <Button variant="contained" onClick={connect}>
+              Connect
+            </Button>
+
+            <div>
+              <video
+                ref={localVideoRef}
+                autoPlay
+                muted
+                playsInline
+                style={{
+                  width: "400px",
+                  height: "300px",
+                  backgroundColor: "black",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div>
+            <h2>Welcome {username}</h2>
+
             <video
               ref={localVideoRef}
               autoPlay
               muted
               playsInline
               style={{
-                width: "400px",
-                height: "300px",
+                width: "500px",
+                height: "350px",
                 backgroundColor: "black",
                 objectFit: "cover",
               }}
             />
+
+            <br />
+
+            <Button variant="contained" onClick={() => setAskForUsername(true)}>
+              Back
+            </Button>
           </div>
-        </div>
-      ) : (
-        <div>
-          <h2>Welcome {username}</h2>
-
-          <video
-            ref={localVideoRef}
-            autoPlay
-            muted
-            playsInline
-            style={{
-              width: "500px",
-              height: "350px",
-              backgroundColor: "black",
-              objectFit: "cover",
-            }}
-          />
-
-          <br />
-
-          <Button variant="contained" onClick={() => setAskForUsername(true)}>
-            Back
-          </Button>
-        </div>
-      )}
-    </div>
-  );
+        )}
+      </div>
+    );
+  };
 }
