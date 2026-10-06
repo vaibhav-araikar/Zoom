@@ -97,6 +97,39 @@ export default function VideoMeetComponent() {
           connections[socketListId] = new RTCPeerConnection(
             peerConfigConnections,
           );
+
+          // ice is liye hai ki agar koi naya client join ho to vo automatically connect ho jaye
+          // ICE = Interactive Connectivity Establishment
+          // iska kaam ye hai ki ek candidate and dusre candidate ke beech connection establish krna
+          connections[socketListId].onicecandidate = (event) => {
+            if (event.candidate !== null) {
+              socketRef.current.emit(
+                "signal",
+                socketListId,
+                JSON.stringify({ ice: event.candidate }),
+              );
+            }
+          };
+
+          connections[socketListId].onaddstream = (event) => {
+            // Handle incoming stream
+            let videoExist = videoRef.current.find(
+              (video) => video.id === socketListId,
+            );
+
+            if (videoExists) {
+              setVideo((videos) => {
+                const updatedVideos = videos.map((video) => {
+                  video.socketId == socketListId
+                    ? { ...video, stream: event.stream }
+                    : video;
+                });
+                videoRef.current = updatedVideos;
+                return updatedVideos;
+              });
+            } else {
+            }
+          };
         });
       });
     });
