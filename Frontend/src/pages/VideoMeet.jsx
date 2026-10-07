@@ -239,10 +239,42 @@ export default function VideoMeetComponent() {
     // ADD LOCAL STREAM
     // =====================================
 
-    if (window.localStream) {
-      window.localStream.getTracks().forEach((track) => {
-        peerConnection.addTrack(track, window.localStream);
-      });
+    if (window.localStream !== undefined && window.localStream !== null) {
+      connections[socketListId].addStream(window.localStream);
+    } else {
+      // todo: blacksilence
+      // black silence stream for when user has no camera/mic it will send a black screen and silence to other users
+      let blackSilence = new MediaStream();
+    }
+
+    if (id === socketIRef.current) {
+      for (let id2 in connections) {
+        if (id2 === socketIdRef.current) continue;
+
+        try {
+          connections[id2].addStream(window.localStream);
+        } catch (error) {
+          console.error("Error adding local stream to peer connection:", error);
+        }
+        connections[id2]
+          .createOffer()
+          .then((description) => {
+            connections[id2].setLocalDescription(description).then(() => {
+              socketRef.current.emit(
+                "signal",
+                id2,
+                JSON.stringify({
+                  // sdp = session description protocol, it contains the information about the media capabilities of the peer connection and it is used to establish the connection between peers
+                  // we can give any name to the sdp like adp, xyz, but sdp is the standard name for it
+                  sdp: connections[id2].localDescription,
+                }),
+              );
+            });
+          })
+          .catch((error) => {
+            console.error("Error creating offer for peer connection:", error);
+          });
+      }
     }
 
     return peerConnection;
