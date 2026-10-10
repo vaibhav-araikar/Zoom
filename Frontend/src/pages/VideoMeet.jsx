@@ -90,56 +90,42 @@ export default function VideoMeetComponent() {
   // SIGNAL MESSAGE FROM SERVER
   // =====================================
 
-  const gotMessageFromServer = (fromId, message) => {
-    console.log("Got message from server:", fromId, message);
+  let gotMessageFromServer = (fromId, message) => {
+    var signal = JSON.parse(message);
 
-    // WebRTC signaling will be handled here
-    try {
-      const signal = JSON.parse(message);
-
-      if (!connections[fromId]) {
-        console.log("No connection found for:", fromId);
-        return;
-      }
-
+    if (fromId !== socketIdRef.current) {
       if (signal.sdp) {
         connections[fromId]
           .setRemoteDescription(new RTCSessionDescription(signal.sdp))
           .then(() => {
             if (signal.sdp.type === "offer") {
-              return connections[fromId].createAnswer();
+              connections[fromId]
+                .createAnswer()
+                .then((description) => {
+                  connections[fromId]
+                    .setLocalDescription(description)
+                    .then(() => {
+                      socketRef.current.emit(
+                        "signal",
+                        fromId,
+                        JSON.stringify({
+                          sdp: connections[fromId].localDescription,
+                        }),
+                      );
+                    })
+                    .catch((e) => console.log(e));
+                })
+                .catch((e) => console.log(e));
             }
           })
-          .then((answer) => {
-            if (answer) {
-              return connections[fromId].setLocalDescription(answer);
-            }
-          })
-          .then(() => {
-            if (connections[fromId].localDescription) {
-              socketRef.current.emit(
-                "signal",
-                fromId,
-                JSON.stringify({
-                  sdp: connections[fromId].localDescription,
-                }),
-              );
-            }
-          })
-          .catch((error) => {
-            console.error("Error handling SDP:", error);
-          });
+          .catch((e) => console.log(e));
       }
 
       if (signal.ice) {
         connections[fromId]
           .addIceCandidate(new RTCIceCandidate(signal.ice))
-          .catch((error) => {
-            console.error("Error adding ICE candidate:", error);
-          });
+          .catch((e) => console.log(e));
       }
-    } catch (error) {
-      console.error("Error parsing signal:", error);
     }
   };
 
