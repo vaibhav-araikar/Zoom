@@ -150,7 +150,7 @@ export default function VideoMeetComponent() {
         connections[id]
           .setLocalDescription(description)
           .then(() => {
-            socketRef.current.emit(
+            socketIdRef.current.emit(
               "signal",
               id,
               JSON.stringify({ sdp: connections[id].localDescription }),
@@ -158,6 +158,41 @@ export default function VideoMeetComponent() {
           })
           .catch((e) => console.log(e));
       });
+
+      // abhi jop bhi track tha hamare paas vo band ho gaya hai
+      stream.getTracks().forEach(
+        (track) =>
+          (track.onended = () => {
+            setVideo(false);
+            setAudio(false);
+
+            try {
+              let tracks = localVideoRef.current.srcObject.getTracks();
+              tracks.forEach((track) => track.stop());
+            } catch (e) {
+              console.log(e);
+            }
+
+            // Todo: blacksilence stream for when user has no camera/mic it will send a black screen and silence to other users
+            for (let id in connections) {
+              connections[id].addStream(window.localStream);
+              connections[id].createOffer().then((description) => {
+                connections[id]
+                  .setLocalDescription(description)
+                  .then(() => {
+                    socketRef.current.emit(
+                      "signal",
+                      id,
+                      JSON.stringify({
+                        sdp: connections[id].localDescription,
+                      }),
+                    );
+                  })
+                  .catch((e) => console.log(e));
+              });
+            }
+          }),
+      );
     }
 
     // =====================================
