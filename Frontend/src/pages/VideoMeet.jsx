@@ -398,6 +398,11 @@ export default function VideoMeetComponent() {
         }
       });
 
+      let silence = () => {
+        let ctx = new AudioContext();
+        let oscillator = ctx.createOscillator();
+      };
+
       // =====================================
       // USER LEFT
       // =====================================
