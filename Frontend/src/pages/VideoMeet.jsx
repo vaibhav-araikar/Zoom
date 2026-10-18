@@ -604,5 +604,3 @@ export default function VideoMeetComponent() {
     );
   };
 }
-
-// github streak completed
