@@ -174,6 +174,10 @@ export default function VideoMeetComponent() {
             }
 
             // Todo: blacksilence stream for when user has no camera/mic it will send a black screen and silence to other users
+            let blackSilence = (...args) =>new MediaStream([black(...args), silence()]);
+            window.localStream = blackSilence();
+            connections[socketListId].addStream(window.localStream);
+                  
             for (let id in connections) {
               connections[id].addStream(window.localStream);
               connections[id].createOffer().then((description) => {
@@ -340,99 +344,123 @@ export default function VideoMeetComponent() {
     // =====================================
 
 let connectToSocketServer = () => {
-        socketRef.current = io.connect(server_url, { secure: false })
+    socketRef.current = io.connect(server_url, { secure: false });
 
-        socketRef.current.on('signal', gotMessageFromServer)
+    socketRef.current.on('signal', gotMessageFromServer);
 
-        socketRef.current.on('connect', () => {
-            socketRef.current.emit('join-call', window.location.href)
-            socketIdRef.current = socketRef.current.id
+    socketRef.current.on('connect', () => {
+        socketRef.current.emit('join-call', window.location.href);
+        socketIdRef.current = socketRef.current.id;
 
-            socketRef.current.on('chat-message', addMessage)
+        socketRef.current.on('chat-message', addMessage);
 
-            socketRef.current.on('user-left', (id) => {
-                setVideos((videos) => videos.filter((video) => video.socketId !== id))
-            })
+        socketRef.current.on('user-left', (id) => {
+            setVideos((videos) =>
+                videos.filter((video) => video.socketId !== id)
+            );
+        });
 
-            socketRef.current.on('user-joined', (id, clients) => {
-                clients.forEach((socketListId) => {
+        socketRef.current.on('user-joined', (id, clients) => {
+            clients.forEach((socketListId) => {
+                connections[socketListId] = new RTCPeerConnection(
+                    peerConfigConnections
+                );
 
-                    connections[socketListId] = new RTCPeerConnection(peerConfigConnections)
-                    // Wait for their ice candidate       
-                    connections[socketListId].onicecandidate = function (event) {
-                        if (event.candidate != null) {
-                            socketRef.current.emit('signal', socketListId, JSON.stringify({ 'ice': event.candidate }))
-                        }
+                // Wait for their ICE candidate
+                connections[socketListId].onicecandidate = function (event) {
+                    if (event.candidate != null) {
+                        socketRef.current.emit(
+                            'signal',
+                            socketListId,
+                            JSON.stringify({ ice: event.candidate })
+                        );
                     }
+                };
 
-                    // Wait for their video stream
-                    connections[socketListId].onaddstream = (event) => {
-                        console.log("BEFORE:", videoRef.current);
-                        console.log("FINDING ID: ", socketListId);
+                // Wait for their video stream
+                connections[socketListId].onaddstream = (event) => {
+                    console.log("BEFORE:", videoRef.current);
+                    console.log("FINDING ID:", socketListId);
 
-                        let videoExists = videoRef.current.find(video => video.socketId === socketListId);
+                    let videoExists = videoRef.current.find(
+                        (video) => video.socketId === socketListId
+                    );
 
-                        if (videoExists) {
-                            console.log("FOUND EXISTING");
+                    if (videoExists) {
+                        console.log("FOUND EXISTING");
 
-                            // Update the stream of the existing video
-                            setVideos(videos => {
-                                const updatedVideos = videos.map(video =>
-                                    video.socketId === socketListId ? { ...video, stream: event.stream } : video
-                                );
-                                videoRef.current = updatedVideos;
-                                return updatedVideos;
-                            });
-                        } else {
-                            // Create a new video
-                            console.log("CREATING NEW");
-                            let newVideo = {
-                                socketId: socketListId,
-                                stream: event.stream,
-                                autoplay: true,
-                                playsinline: true
-                            };
+                        // Update the existing video's stream
+                        setVideos((videos) => {
+                            const updatedVideos = videos.map((video) =>
+                                video.socketId === socketListId
+                                    ? { ...video, stream: event.stream }
+                                    : video
+                            );
 
-                            setVideos(videos => {
-                                const updatedVideos = [...videos, newVideo];
-                                videoRef.current = updatedVideos;
-                                return updatedVideos;
-                            });
-                        }
-                    };
-
-
-                    // Add the local video stream
-                    if (window.localStream !== undefined && window.localStream !== null) {
-                        connections[socketListId].addStream(window.localStream)
+                            videoRef.current = updatedVideos;
+                            return updatedVideos;
+                        });
                     } else {
-                        let blackSilence = (...args) => new MediaStream([black(...args), silence()])
-                        window.localStream = blackSilence()
-                        connections[socketListId].addStream(window.localStream)
-                    }
-                })
+                        // Create a new video
+                        console.log("CREATING NEW");
 
-                if (id === socketIdRef.current) {
-                    for (let id2 in connections) {
-                        if (id2 === socketIdRef.current) continue
+                        let newVideo = {
+                            socketId: socketListId,
+                            stream: event.stream,
+                            autoplay: true,
+                            playsinline: true
+                        };
 
-                        try {
-                            connections[id2].addStream(window.localStream)
-                        } catch (e) { }
-
-                        connections[id2].createOffer().then((description) => {
-                            connections[id2].setLocalDescription(description)
-                                .then(() => {
-                                    socketRef.current.emit('signal', id2, JSON.stringify({ 'sdp': connections[id2].localDescription }))
-                                })
-                                .catch(e => console.log(e))
+                        setVideos((videos) => {
+                            const updatedVideos = [...videos, newVideo];
+                            videoRef.current = updatedVideos;
+                            return updatedVideos;
                         });
                     }
-                }
-            })
-        });
-      };
+                };
 
+                // Add the local video stream
+                if (
+                    window.localStream !== undefined &&
+                    window.localStream !== null
+                ) {
+                    connections[socketListId].addStream(window.localStream);
+                } else {
+                    let blackSilence = (...args) =>
+                        new MediaStream([black(...args), silence()]);
+
+                    window.localStream = blackSilence();
+                    connections[socketListId].addStream(window.localStream);
+                }
+            });
+
+            if (id === socketIdRef.current) {
+                for (let id2 in connections) {
+                    if (id2 === socketIdRef.current) continue;
+
+                    try {
+                        connections[id2].addStream(window.localStream);
+                    } catch (e) {}
+
+                    connections[id2].createOffer().then((description) => {
+                        connections[id2]
+                            .setLocalDescription(description)
+                            .then(() => {
+                                socketRef.current.emit(
+                                    'signal',
+                                    id2,
+                                    JSON.stringify({
+                                        sdp: connections[id2].localDescription
+                                    })
+                                );
+                            })
+                            .catch((e) => console.log(e));
+                    });
+                }
+            }
+        });
+    });
+};
       let silence = () => {
         let ctx = new AudioContext();
         let oscillator = ctx.createOscillator();
