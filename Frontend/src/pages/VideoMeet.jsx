@@ -692,6 +692,7 @@ export default function VideoMeetComponent() {
           </Button>
 
           <div>
+            {/* Local video */}
             <video
               ref={localVideoRef}
               autoPlay
@@ -704,12 +705,37 @@ export default function VideoMeetComponent() {
                 objectFit: "cover",
               }}
             />
+
+            {/* Remote videos in lobby */}
+            {videos.map((video) => (
+              <div key={video.socketId}>
+                <h2>{video.socketId}</h2>
+
+                <video
+                  data-socket={video.socketId}
+                  autoPlay
+                  playsInline
+                  ref={(ref) => {
+                    if (ref && video.stream) {
+                      ref.srcObject = video.stream;
+                    }
+                  }}
+                  style={{
+                    width: "400px",
+                    height: "300px",
+                    backgroundColor: "black",
+                    objectFit: "cover",
+                  }}
+                />
+              </div>
+            ))}
           </div>
         </div>
       ) : (
         <div>
           <h2>Welcome {username}</h2>
 
+          {/* Local video */}
           <video
             ref={localVideoRef}
             autoPlay
@@ -726,9 +752,11 @@ export default function VideoMeetComponent() {
           {/* Remote videos */}
           <div>
             {videos.map((video) => (
-              // FIX: key={video.id} -> key={video.socketId}
               <div key={video.socketId}>
+                <h2>{video.socketId}</h2>
+
                 <video
+                  data-socket={video.socketId}
                   autoPlay
                   playsInline
                   ref={(videoElement) => {
@@ -743,7 +771,6 @@ export default function VideoMeetComponent() {
                     objectFit: "cover",
                   }}
                 />
-                <h2>{video.socketId}</h2>
               </div>
             ))}
           </div>
