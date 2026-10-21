@@ -693,6 +693,7 @@ export default function VideoMeetComponent() {
 
           <div className="meetVideoContainer">
             <video
+              className="meetUserVideo"
               ref={localVideoRef}
               autoPlay
               muted
@@ -749,7 +750,7 @@ export default function VideoMeetComponent() {
           />
 
           {/* Remote videos */}
-          <div>
+          <div className="meetVideoContainer">
             {videos.map((video) => (
               <div key={video.socketId}>
                 <h2>{video.socketId}</h2>
