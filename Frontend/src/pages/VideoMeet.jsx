@@ -691,8 +691,7 @@ export default function VideoMeetComponent() {
             Connect
           </Button>
 
-          <div>
-            {/* Local video */}
+          <div className="meetVideoContainer">
             <video
               ref={localVideoRef}
               autoPlay
@@ -732,7 +731,7 @@ export default function VideoMeetComponent() {
           </div>
         </div>
       ) : (
-        <div>
+        <div className="meetVideoContainer">
           <h2>Welcome {username}</h2>
 
           {/* Local video */}
