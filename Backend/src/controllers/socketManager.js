@@ -66,7 +66,7 @@ const connectToSocketServer = (server) => {
     });
 
     socket.on("disconnect", () => {
-      var diffTime = Math.abs(timeOnline[socket.id] - new Data());
+      var diffTime = Math.abs(timeOnline[socket.id] - new Date());
 
       var key;
 
