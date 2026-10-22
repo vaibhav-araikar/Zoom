@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, TextField } from "@mui/material";
 import { io } from "socket.io-client";
-import "./VideoMeet.css";
+import "../styles/videoComponent.module.css";
 
 // Backend Socket.IO server
 const server_url = "http://localhost:5000";
