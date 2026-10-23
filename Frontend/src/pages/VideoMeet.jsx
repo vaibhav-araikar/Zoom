@@ -1,7 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, TextField } from "@mui/material";
+import { Button, IconButton, TextField, Badge } from "@mui/material";
 import { io } from "socket.io-client";
 import "../styles/videoComponent.module.css";
+import VideocamIcon from "@mui/icons-material/Videocam";
+import VideocamOffIcon from "@mui/icons-material/VideocamOff";
+import CallEndIcon from "@mui/icons-material/CallEnd";
+import MicIcon from "@mui/icons-material/Mic";
+import MicOffIcon from "@mui/icons-material/MicOff";
+import ScreenShareIcon from "@mui/icons-material/ScreenShare";
+import StopScreenShareIcon from "@mui/icons-material/StopScreenShare";
+import ChatIcon from "@mui/icons-material/Chat";
 
 // Backend Socket.IO server
 const server_url = "http://localhost:5000";
@@ -692,6 +700,12 @@ export default function VideoMeetComponent() {
           </Button>
 
           <div className="meetVideoContainer">
+            <div className="buttonContainers">
+              <IconButton style={{ color: "black" }}>
+                {video === true ? <VideocamIcon /> : <VideocamOffIcon />}
+              </IconButton>
+            </div>
+
             <video
               className="meetUserVideo"
               ref={localVideoRef}
@@ -708,7 +722,7 @@ export default function VideoMeetComponent() {
 
             {/* Remote videos in lobby */}
             {videos.map((video) => (
-              <div key={video.socketId}>
+              <div className="conferenceView" key={video.socketId}>
                 <h2>{video.socketId}</h2>
 
                 <video
@@ -786,4 +800,5 @@ export default function VideoMeetComponent() {
   );
 }
 
-// ok git error also solved
+// working on ui side
+// as ui is slightly different
