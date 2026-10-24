@@ -701,8 +701,19 @@ export default function VideoMeetComponent() {
 
           <div className="meetVideoContainer">
             <div className="buttonContainers">
+              {/* Video Cam Icon */}
               <IconButton style={{ color: "black" }}>
                 {video === true ? <VideocamIcon /> : <VideocamOffIcon />}
+              </IconButton>
+
+              {/* Call end icon */}
+              <IconButton style={{ color: "black" }}>
+                <CallEnd />
+              </IconButton>
+
+              {/* Mic Icon */}
+              <IconButton style={{ color: "black" }}>
+                {audio === true ? <MicIcon /> : <MicOffIcon />}
               </IconButton>
             </div>
 
