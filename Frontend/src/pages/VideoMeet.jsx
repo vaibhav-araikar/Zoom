@@ -707,14 +707,27 @@ export default function VideoMeetComponent() {
               </IconButton>
 
               {/* Call end icon */}
-              <IconButton style={{ color: "black" }}>
-                <CallEnd />
+              <IconButton style={{ color: "red" }}>
+                <CallEndIcon />
               </IconButton>
 
               {/* Mic Icon */}
               <IconButton style={{ color: "black" }}>
                 {audio === true ? <MicIcon /> : <MicOffIcon />}
               </IconButton>
+
+              {/* screen share icon */}
+              {screenAvailable == true ? (
+                <IconButton>
+                  {screen == true ? (
+                    <ScreenShareIcon />
+                  ) : (
+                    <StopScreenShareIcon />
+                  )}
+                </IconButton>
+              ) : (
+                <></>
+              )}
             </div>
 
             <video
