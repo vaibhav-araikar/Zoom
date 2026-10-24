@@ -52,6 +52,8 @@ export default function VideoMeetComponent() {
   const [askForUsername, setAskForUsername] = useState(true);
   const [username, setUsername] = useState("");
 
+  const [newMessages, setNewMessages] = useState(33);
+
   // Remote video list
   const [videos, setVideos] = useState([]);
 
@@ -728,6 +730,13 @@ export default function VideoMeetComponent() {
               ) : (
                 <></>
               )}
+
+              {/* chat icons */}
+              <Badge badgeContent={newMessages} max={999} color="orange">
+                <IconButton style={{ color: "black" }}>
+                  <ChatIcon />
+                </IconButton>
+              </Badge>
             </div>
 
             <video
