@@ -329,6 +329,20 @@ export default function VideoMeetComponent() {
       }
     };
 
+    let getMedia = () => {
+      setVideo(videoAvailable);
+      setAudio(audioAvailable);
+      connectToSocketServer();
+    };
+
+    let connect = () => {
+      setAskForUsername(false);
+      getMedia();
+    };
+
+    let handleVideo = () => {
+      setVideo(!video);
+    };
     // CONNECTION STATE
     peerConnection.onconnectionstatechange = () => {
       console.log(
