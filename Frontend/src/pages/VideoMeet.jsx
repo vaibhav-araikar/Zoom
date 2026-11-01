@@ -599,6 +599,7 @@ export default function VideoMeetComponent() {
     setAudio(track.enabled);
   };
 
+  const handleScreen = () => {};
   // =====================================
   // REQUEST PERMISSION
   // =====================================
