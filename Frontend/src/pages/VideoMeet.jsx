@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, IconButton, TextField, Badge } from "@mui/material";
 import { io } from "socket.io-client";
-import "../styles/videoComponent.module.css";
+import styles from "../styles/videoComponent.module.css";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import VideocamOffIcon from "@mui/icons-material/VideocamOff";
 import CallEndIcon from "@mui/icons-material/CallEnd";
@@ -16,7 +16,7 @@ const server_url = "http://localhost:5000";
 
 const connections = {};
 
-// FIXED: ICE candidates that arrive before the remote description is set
+// ICE candidates that arrive before the remote description is set
 const pendingIce = {};
 
 const peerConfigConnections = {
@@ -27,8 +27,7 @@ const peerConfigConnections = {
   ],
 };
 
-// helper that adds local tracks with addTrack (addStream is deprecated
-// and missing in some browsers)
+// helper that adds local tracks with addTrack (addStream is deprecated)
 const addLocalTracks = (peerConnection) => {
   if (!window.localStream) return;
 
@@ -66,15 +65,12 @@ export default function VideoMeetComponent() {
   const [audio, setAudio] = useState(true);
 
   const [screenAvailable, setScreenAvailable] = useState(false);
-
-  // FIXED: `screen` was never declared (it was the browser's window.screen,
-  // so `screen == true` was always false)
   const [screen, setScreen] = useState(false);
 
   const [askForUsername, setAskForUsername] = useState(true);
   const [username, setUsername] = useState("");
 
-  const [newMessages, setNewMessages] = useState(33);
+  const [newMessages, setNewMessages] = useState(0);
 
   // Remote video list
   const [videos, setVideos] = useState([]);
@@ -134,7 +130,7 @@ export default function VideoMeetComponent() {
         connections[fromId]
           .setRemoteDescription(new RTCSessionDescription(signal.sdp))
           .then(() => {
-            // FIXED: apply ICE candidates that arrived early
+            // apply ICE candidates that arrived early
             (pendingIce[fromId] || []).forEach((candidate) =>
               connections[fromId]
                 .addIceCandidate(new RTCIceCandidate(candidate))
@@ -166,8 +162,7 @@ export default function VideoMeetComponent() {
       }
 
       if (signal.ice) {
-        // FIXED: adding a candidate before setRemoteDescription fails silently,
-        // so queue it until the remote description exists
+        // queue the candidate until the remote description exists
         if (
           connections[fromId].remoteDescription &&
           connections[fromId].remoteDescription.type
@@ -196,7 +191,7 @@ export default function VideoMeetComponent() {
     for (let id in connections) {
       if (id === socketIdRef.current) continue;
 
-      addLocalTracks(connections[id]); // FIXED: addStream -> addLocalTracks
+      addLocalTracks(connections[id]);
 
       connections[id].createOffer().then((description) => {
         console.log(description);
@@ -227,14 +222,14 @@ export default function VideoMeetComponent() {
             console.log(e);
           }
 
-          // Todo: blacksilence stream for when user has no camera/mic it will send a black screen and silence to other users
+          // blacksilence stream for when user has no camera/mic
           let blackSilence = (...args) =>
             new MediaStream([black(...args), silence()]);
           window.localStream = blackSilence();
           localVideoRef.current.srcObject = window.localStream;
 
           for (let id in connections) {
-            addLocalTracks(connections[id]); // FIXED: addStream -> addLocalTracks
+            addLocalTracks(connections[id]);
             connections[id].createOffer().then((description) => {
               connections[id]
                 .setLocalDescription(description)
@@ -329,20 +324,6 @@ export default function VideoMeetComponent() {
       }
     };
 
-    let getMedia = () => {
-      setVideo(videoAvailable);
-      setAudio(audioAvailable);
-      connectToSocketServer();
-    };
-
-    let connect = () => {
-      setAskForUsername(false);
-      getMedia();
-    };
-
-    let handleVideo = () => {
-      setVideo(!video);
-    };
     // CONNECTION STATE
     peerConnection.onconnectionstatechange = () => {
       console.log(
@@ -352,14 +333,13 @@ export default function VideoMeetComponent() {
     };
 
     // ADD LOCAL STREAM
-    // FIXED: addStream -> addLocalTracks
     addLocalTracks(connections[socketListId]);
 
     if (id === socketIdRef.current) {
       for (let id2 in connections) {
         if (id2 === socketIdRef.current) continue;
 
-        addLocalTracks(connections[id2]); // FIXED: addStream -> addLocalTracks
+        addLocalTracks(connections[id2]);
 
         connections[id2]
           .createOffer()
@@ -389,7 +369,7 @@ export default function VideoMeetComponent() {
   // =====================================
 
   let connectToSocketServer = () => {
-    // FIXED: never keep two sockets open (Back + Connect used to open a 2nd one)
+    // never keep two sockets open
     if (socketRef.current) {
       socketRef.current.disconnect();
     }
@@ -399,13 +379,15 @@ export default function VideoMeetComponent() {
     socketRef.current.on("signal", gotMessageFromServer);
 
     socketRef.current.on("connect", () => {
-      // FIXED: set the id BEFORE joining, so it is ready when user-joined arrives
+      // set the id BEFORE joining, so it is ready when user-joined arrives
       socketIdRef.current = socketRef.current.id;
       socketRef.current.emit("join-call", window.location.href);
 
       socketRef.current.on("chat-message", addMessageToChat);
 
       socketRef.current.on("user-joined", (id, clients) => {
+        console.log("user-joined", id, clients); // debug: check in both windows
+
         if (!Array.isArray(clients)) {
           console.error("user-joined received no clients list:", id, clients);
           return;
@@ -417,7 +399,7 @@ export default function VideoMeetComponent() {
           connections[socketListId] = new RTCPeerConnection(
             peerConfigConnections,
           );
-          pendingIce[socketListId] = []; // FIXED
+          pendingIce[socketListId] = [];
 
           // Wait for their ICE candidate
           connections[socketListId].onicecandidate = function (event) {
@@ -430,7 +412,7 @@ export default function VideoMeetComponent() {
             }
           };
 
-          // onaddstream -> ontrack
+          // Wait for their video stream
           connections[socketListId].ontrack = (event) => {
             const stream = event.streams[0];
             if (!stream) return;
@@ -457,7 +439,7 @@ export default function VideoMeetComponent() {
             });
           };
 
-          // add local tracks with addTrack instead of addStream
+          // Add local tracks
           if (window.localStream !== undefined && window.localStream !== null) {
             addLocalTracks(connections[socketListId]);
           } else {
@@ -501,7 +483,7 @@ export default function VideoMeetComponent() {
         connections[id].close();
         delete connections[id];
       }
-      delete pendingIce[id]; // FIXED
+      delete pendingIce[id];
 
       const updatedVideos = videoRef.current.filter(
         (video) => video.socketId !== id,
@@ -603,16 +585,14 @@ export default function VideoMeetComponent() {
   // CAMERA / MIC TOGGLES
   // =====================================
 
-  // FIXED: the buttons had no onClick. These flip track.enabled, so the
-  // camera is not restarted (restarting caused the double "Permission granted")
-  const toggleVideo = () => {
+  const handleVideo = () => {
     const track = window.localStream && window.localStream.getVideoTracks()[0];
     if (!track) return;
     track.enabled = !track.enabled;
     setVideo(track.enabled);
   };
 
-  const toggleAudio = () => {
+  const handleAudio = () => {
     const track = window.localStream && window.localStream.getAudioTracks()[0];
     if (!track) return;
     track.enabled = !track.enabled;
@@ -627,7 +607,7 @@ export default function VideoMeetComponent() {
     getPermission();
 
     return () => {
-      // FIXED: also close connections and socket on unmount
+      // close connections and socket on unmount
       Object.keys(connections).forEach((id) => {
         connections[id].close();
         delete connections[id];
@@ -645,15 +625,6 @@ export default function VideoMeetComponent() {
       }
     };
   }, []);
-
-  // =====================================
-  // UPDATE MEDIA
-  // =====================================
-
-  // FIXED: this effect was removed. It ran getUserMedia() at the same time as
-  // getPermission(), so two camera streams were opened and one was left running
-  // (camera light stuck on). getUserMedia() above is kept but no longer
-  // called automatically.
 
   // =====================================
   // RE-ATTACH LOCAL VIDEO (lobby <-> meeting)
@@ -693,12 +664,9 @@ export default function VideoMeetComponent() {
   };
 
   // =====================================
-  // BACK BUTTON
+  // BACK / END CALL
   // =====================================
 
-  // FIXED: Back used to only flip the view, leaving the socket and peer
-  // connections alive. Connecting again then skipped the old (dead)
-  // connections, so no remote video appeared.
   const goBack = () => {
     Object.keys(connections).forEach((id) => {
       connections[id].close();
@@ -725,6 +693,7 @@ export default function VideoMeetComponent() {
   return (
     <div>
       {askForUsername ? (
+        // LOBBY: plain white page
         <div>
           <h2>Enter into lobby</h2>
 
@@ -740,9 +709,8 @@ export default function VideoMeetComponent() {
             Connect
           </Button>
 
-          <div className="meetVideoContainer">
+          <div>
             <video
-              className="meetUserVideo"
               ref={localVideoRef}
               autoPlay
               muted
@@ -752,89 +720,58 @@ export default function VideoMeetComponent() {
                 height: "300px",
                 backgroundColor: "black",
                 objectFit: "cover",
+                display: "block",
               }}
             />
 
-            {/* Buttons at the bottom of the video (lobby) */}
-            <div className="buttonContainers">
-              <IconButton onClick={toggleVideo} style={{ color: "black" }}>
+            {/* Buttons under the video (lobby) */}
+            <div>
+              <IconButton onClick={handleVideo} style={{ color: "black" }}>
                 {video === true ? <VideocamIcon /> : <VideocamOffIcon />}
               </IconButton>
 
-              <IconButton onClick={goBack} style={{ color: "red" }}>
-                <CallEndIcon />
-              </IconButton>
-
-              <IconButton onClick={toggleAudio} style={{ color: "black" }}>
+              <IconButton onClick={handleAudio} style={{ color: "black" }}>
                 {audio === true ? <MicIcon /> : <MicOffIcon />}
               </IconButton>
-
-              {screenAvailable == true ? (
-                <IconButton>
-                  {screen == true ? (
-                    <ScreenShareIcon />
-                  ) : (
-                    <StopScreenShareIcon />
-                  )}
-                </IconButton>
-              ) : (
-                <></>
-              )}
-
-              <Badge badgeContent={newMessages} max={999} color="warning">
-                <IconButton style={{ color: "black" }}>
-                  <ChatIcon />
-                </IconButton>
-              </Badge>
             </div>
-
-            {/* Remote videos in lobby */}
-            {videos.map((video) => (
-              <div className="conferenceView" key={video.socketId}>
-                <h2>{video.socketId}</h2>
-
-                <video
-                  data-socket={video.socketId}
-                  autoPlay
-                  playsInline
-                  ref={(ref) => {
-                    // FIXED: only set srcObject when it changed (stops flicker)
-                    if (ref && video.stream && ref.srcObject !== video.stream) {
-                      ref.srcObject = video.stream;
-                    }
-                  }}
-                  style={{
-                    width: "400px",
-                    height: "300px",
-                    backgroundColor: "black",
-                    objectFit: "cover",
-                  }}
-                />
-              </div>
-            ))}
           </div>
         </div>
       ) : (
-        <div className="meetVideoContainer">
-          <h2>Welcome {username}</h2>
+        // MEETING: dark page, grid on the left, round video bottom right
+        <div className={styles.meetVideoContainer}>
+          {/* Other users' videos */}
+          <div className={styles.conferenceView}>
+            {videos.map((video) => (
+              <video
+                key={video.socketId}
+                data-socket={video.socketId}
+                autoPlay
+                playsInline
+                ref={(videoElement) => {
+                  if (
+                    videoElement &&
+                    video.stream &&
+                    videoElement.srcObject !== video.stream
+                  ) {
+                    videoElement.srcObject = video.stream;
+                  }
+                }}
+              />
+            ))}
+          </div>
 
-          {/* Local video */}
+          {/* My own video (round, bottom right) */}
           <video
+            className={styles.meetUserVideo}
             ref={localVideoRef}
             autoPlay
             muted
             playsInline
-            style={{
-              width: "500px",
-              height: "350px",
-              backgroundColor: "black",
-              objectFit: "cover",
-            }}
           />
 
-          {/* Buttons at the bottom of the video (meeting) */}
-          <div className="buttonContainers">
-            <IconButton onClick={toggleVideo} style={{ color: "black" }}>
+          {/* Buttons (bottom center) */}
+          <div className={styles.buttonContainers}>
+            <IconButton onClick={handleVideo} style={{ color: "white" }}>
               {video === true ? <VideocamIcon /> : <VideocamOffIcon />}
             </IconButton>
 
@@ -842,61 +779,28 @@ export default function VideoMeetComponent() {
               <CallEndIcon />
             </IconButton>
 
-            <IconButton onClick={toggleAudio} style={{ color: "black" }}>
+            <IconButton onClick={handleAudio} style={{ color: "white" }}>
               {audio === true ? <MicIcon /> : <MicOffIcon />}
             </IconButton>
 
-            {screenAvailable == true ? (
-              <IconButton>
-                {screen == true ? <ScreenShareIcon /> : <StopScreenShareIcon />}
+            {screenAvailable === true ? (
+              <IconButton style={{ color: "white" }}>
+                {screen === true ? (
+                  <ScreenShareIcon />
+                ) : (
+                  <StopScreenShareIcon />
+                )}
               </IconButton>
             ) : (
               <></>
             )}
 
             <Badge badgeContent={newMessages} max={999} color="warning">
-              <IconButton style={{ color: "black" }}>
+              <IconButton style={{ color: "white" }}>
                 <ChatIcon />
               </IconButton>
             </Badge>
           </div>
-
-          {/* Remote videos */}
-          <div className="meetVideoContainer">
-            {videos.map((video) => (
-              <div key={video.socketId}>
-                <h2>{video.socketId}</h2>
-
-                <video
-                  data-socket={video.socketId}
-                  autoPlay
-                  playsInline
-                  ref={(videoElement) => {
-                    // FIXED: only set srcObject when it changed (stops flicker)
-                    if (
-                      videoElement &&
-                      video.stream &&
-                      videoElement.srcObject !== video.stream
-                    ) {
-                      videoElement.srcObject = video.stream;
-                    }
-                  }}
-                  style={{
-                    width: "400px",
-                    height: "300px",
-                    backgroundColor: "black",
-                    objectFit: "cover",
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-
-          <br />
-
-          <Button variant="contained" onClick={goBack}>
-            Back
-          </Button>
         </div>
       )}
     </div>
