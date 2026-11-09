@@ -604,7 +604,75 @@ export default function VideoMeetComponent() {
   // Handle screen toggle
   const handleScreen = () => {};
 
-  let getDisplayMediaSuccess = (stream) => {};
+  let getDisplayMediaSuccess = (stream) => {
+    try {
+      window.localStream.getTracks().forEach((track) => track.stop());
+    } catch (e) {
+      console.log(e);
+    }
+    window.localStream = stream;
+    localVideoRef.current.srcObject = stream;
+
+    for (let id in connections) {
+      if (id === socketIdRef.current) continue;
+      connections[id].addTrack(stream.getVideoTracks()[0], stream);
+      connections[id]
+        .createOffer()
+        .then((description) => {
+          connections[id]
+            .setLocalDescription(description)
+            .then(() => {
+              socketRef.current.emit(
+                "signal",
+                id,
+                JSON.stringify({ sdp: connections[id].localDescription }),
+              );
+            })
+            .catch((e) => console.log(e));
+        })
+        .catch((e) => console.log(e));
+      });
+
+    stream.getTracks().forEach(
+      (track) =>
+        (track.onended = () => {
+          setVideo(false);
+          setAudio(false);
+
+          try {
+            let tracks = localVideoRef.current.srcObject.getTracks();
+            tracks.forEach((track) => track.stop());
+          } catch (e) {
+            console.log(e);
+          }
+
+          // blacksilence stream for when user has no camera/mic
+          let blackSilence = (...args) =>
+            new MediaStream([black(...args), silence()]);
+          window.localStream = blackSilence();
+          localVideoRef.current.srcObject = window.localStream;
+
+          for (let id in connections) {
+            addLocalTracks(connections[id]);
+            connections[id].createOffer().then((description) => {
+              connections[id]
+                .setLocalDescription(description)
+                .then(() => {
+                  socketRef.current.emit(
+                    "signal",
+                    id,
+                    JSON.stringify({
+                      sdp: connections[id].localDescription,
+                    }),
+                  );
+                })
+                .catch((e) => console.log(e));
+            });
+          }
+        }),
+      );
+    };
+  };
 
   let getDisplayMedia = async () => {
     if (screen) {
@@ -612,13 +680,13 @@ export default function VideoMeetComponent() {
         navigator.mediaDevices
           .getDisplayMedia({ video: true, audio: true })
           .then(getDisplayMediaSuccess)
-          .then((stream) => {})
           .catch((error) => {
             console.error("Error getting display media:", error);
           });
       }
     }
 
+  };
     useEffect(() => {
       if (screen !== undefined) {
         getDisplayMedia();
