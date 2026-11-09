@@ -602,7 +602,9 @@ export default function VideoMeetComponent() {
   };
 
   // Handle screen toggle
-  const handleScreen = () => {};
+  const handleScreen = () => {
+    setScreen(!screen);
+  };
 
   let getDisplayMediaSuccess = (stream) => {
     try {
@@ -631,13 +633,12 @@ export default function VideoMeetComponent() {
             .catch((e) => console.log(e));
         })
         .catch((e) => console.log(e));
-      });
+    }
 
     stream.getTracks().forEach(
       (track) =>
         (track.onended = () => {
-          setVideo(false);
-          setAudio(false);
+          setScreen(false);
 
           try {
             let tracks = localVideoRef.current.srcObject.getTracks();
@@ -652,26 +653,9 @@ export default function VideoMeetComponent() {
           window.localStream = blackSilence();
           localVideoRef.current.srcObject = window.localStream;
 
-          for (let id in connections) {
-            addLocalTracks(connections[id]);
-            connections[id].createOffer().then((description) => {
-              connections[id]
-                .setLocalDescription(description)
-                .then(() => {
-                  socketRef.current.emit(
-                    "signal",
-                    id,
-                    JSON.stringify({
-                      sdp: connections[id].localDescription,
-                    }),
-                  );
-                })
-                .catch((e) => console.log(e));
-            });
-          }
+          getUserMedia();
         }),
-      );
-    };
+    );
   };
 
   let getDisplayMedia = async () => {
@@ -685,219 +669,217 @@ export default function VideoMeetComponent() {
           });
       }
     }
-
   };
-    useEffect(() => {
-      if (screen !== undefined) {
-        getDisplayMedia();
-      }
-    }, [screen]);
+  useEffect(() => {
+    if (screen !== undefined) {
+      getDisplayMedia();
+    }
+  }, [screen]);
 
-    // =====================================
-    // REQUEST PERMISSION
-    // =====================================
+  // =====================================
+  // REQUEST PERMISSION
+  // =====================================
 
-    useEffect(() => {
-      getPermission();
+  useEffect(() => {
+    getPermission();
 
-      return () => {
-        // close connections and socket on unmount
-        Object.keys(connections).forEach((id) => {
-          connections[id].close();
-          delete connections[id];
-        });
-
-        if (socketRef.current) {
-          socketRef.current.disconnect();
-          socketRef.current = null;
-        }
-
-        if (window.localStream) {
-          window.localStream.getTracks().forEach((track) => {
-            track.stop();
-          });
-        }
-      };
-    }, []);
-
-    // =====================================
-    // RE-ATTACH LOCAL VIDEO (lobby <-> meeting)
-    // =====================================
-
-    useEffect(() => {
-      if (localVideoRef.current && window.localStream) {
-        localVideoRef.current.srcObject = window.localStream;
-      }
-    }, [askForUsername]);
-
-    // =====================================
-    // CONNECT BUTTON
-    // =====================================
-
-    const connect = async () => {
-      console.log("Connect button clicked");
-
-      if (!username.trim()) {
-        alert("Please enter your username");
-        return;
-      }
-
-      // Make sure camera/mic are available
-      if (!window.localStream) {
-        await getPermission();
-      }
-
-      setVideo(videoAvailable);
-      setAudio(audioAvailable);
-
-      // Connect Socket.IO
-      connectToSocketServer();
-
-      // Hide lobby
-      setAskForUsername(false);
-    };
-
-    // =====================================
-    // BACK / END CALL
-    // =====================================
-
-    const goBack = () => {
+    return () => {
+      // close connections and socket on unmount
       Object.keys(connections).forEach((id) => {
         connections[id].close();
         delete connections[id];
-        delete pendingIce[id];
       });
 
       if (socketRef.current) {
         socketRef.current.disconnect();
         socketRef.current = null;
       }
-      socketIdRef.current = null;
 
-      videoRef.current = [];
-      setVideos([]);
-
-      setAskForUsername(true);
+      if (window.localStream) {
+        window.localStream.getTracks().forEach((track) => {
+          track.stop();
+        });
+      }
     };
+  }, []);
 
-    // =====================================
-    // COMPONENT
-    // =====================================
+  // =====================================
+  // RE-ATTACH LOCAL VIDEO (lobby <-> meeting)
+  // =====================================
 
-    return (
-      <div>
-        {askForUsername ? (
-          // LOBBY: plain white page
+  useEffect(() => {
+    if (localVideoRef.current && window.localStream) {
+      localVideoRef.current.srcObject = window.localStream;
+    }
+  }, [askForUsername]);
+
+  // =====================================
+  // CONNECT BUTTON
+  // =====================================
+
+  const connect = async () => {
+    console.log("Connect button clicked");
+
+    if (!username.trim()) {
+      alert("Please enter your username");
+      return;
+    }
+
+    // Make sure camera/mic are available
+    if (!window.localStream) {
+      await getPermission();
+    }
+
+    setVideo(videoAvailable);
+    setAudio(audioAvailable);
+
+    // Connect Socket.IO
+    connectToSocketServer();
+
+    // Hide lobby
+    setAskForUsername(false);
+  };
+
+  // =====================================
+  // BACK / END CALL
+  // =====================================
+
+  const goBack = () => {
+    Object.keys(connections).forEach((id) => {
+      connections[id].close();
+      delete connections[id];
+      delete pendingIce[id];
+    });
+
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
+    socketIdRef.current = null;
+
+    videoRef.current = [];
+    setVideos([]);
+
+    setAskForUsername(true);
+  };
+
+  // =====================================
+  // COMPONENT
+  // =====================================
+
+  return (
+    <div>
+      {askForUsername ? (
+        // LOBBY: plain white page
+        <div>
+          <h2>Enter into lobby</h2>
+
+          <TextField
+            id="outlined-basic"
+            label="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            variant="outlined"
+          />
+
+          <Button variant="contained" onClick={connect}>
+            Connect
+          </Button>
+
           <div>
-            <h2>Enter into lobby</h2>
-
-            <TextField
-              id="outlined-basic"
-              label="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              variant="outlined"
-            />
-
-            <Button variant="contained" onClick={connect}>
-              Connect
-            </Button>
-
-            <div>
-              <video
-                ref={localVideoRef}
-                autoPlay
-                muted
-                playsInline
-                style={{
-                  width: "400px",
-                  height: "300px",
-                  backgroundColor: "black",
-                  objectFit: "cover",
-                  display: "block",
-                }}
-              />
-
-              {/* Buttons under the video (lobby) */}
-              <div>
-                <IconButton onClick={handleVideo} style={{ color: "black" }}>
-                  {video === true ? <VideocamIcon /> : <VideocamOffIcon />}
-                </IconButton>
-
-                <IconButton onClick={handleAudio} style={{ color: "black" }}>
-                  {audio === true ? <MicIcon /> : <MicOffIcon />}
-                </IconButton>
-              </div>
-            </div>
-          </div>
-        ) : (
-          // MEETING: dark page, grid on the left, round video bottom right
-          <div className={styles.meetVideoContainer}>
-            {/* Other users' videos */}
-            <div className={styles.conferenceView}>
-              {videos.map((video) => (
-                <video
-                  key={video.socketId}
-                  data-socket={video.socketId}
-                  autoPlay
-                  playsInline
-                  ref={(videoElement) => {
-                    if (
-                      videoElement &&
-                      video.stream &&
-                      videoElement.srcObject !== video.stream
-                    ) {
-                      videoElement.srcObject = video.stream;
-                    }
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* My own video (round, bottom right) */}
             <video
-              className={styles.meetUserVideo}
               ref={localVideoRef}
               autoPlay
               muted
               playsInline
+              style={{
+                width: "400px",
+                height: "300px",
+                backgroundColor: "black",
+                objectFit: "cover",
+                display: "block",
+              }}
             />
 
-            {/* Buttons (bottom center) */}
-            <div className={styles.buttonContainers}>
-              <IconButton onClick={handleVideo} style={{ color: "white" }}>
+            {/* Buttons under the video (lobby) */}
+            <div>
+              <IconButton onClick={handleVideo} style={{ color: "black" }}>
                 {video === true ? <VideocamIcon /> : <VideocamOffIcon />}
               </IconButton>
 
-              <IconButton onClick={goBack} style={{ color: "red" }}>
-                <CallEndIcon />
-              </IconButton>
-
-              <IconButton onClick={handleAudio} style={{ color: "white" }}>
+              <IconButton onClick={handleAudio} style={{ color: "black" }}>
                 {audio === true ? <MicIcon /> : <MicOffIcon />}
               </IconButton>
-
-              {screenAvailable === true ? (
-                <IconButton style={{ color: "white" }}>
-                  {screen === true ? (
-                    <ScreenShareIcon />
-                  ) : (
-                    <StopScreenShareIcon />
-                  )}
-                </IconButton>
-              ) : (
-                <></>
-              )}
-
-              <Badge badgeContent={newMessages} max={999} color="warning">
-                <IconButton style={{ color: "white" }}>
-                  <ChatIcon />
-                </IconButton>
-              </Badge>
             </div>
           </div>
-        )}
-      </div>
-    );
-  };
+        </div>
+      ) : (
+        // MEETING: dark page, grid on the left, round video bottom right
+        <div className={styles.meetVideoContainer}>
+          {/* Other users' videos */}
+          <div className={styles.conferenceView}>
+            {videos.map((video) => (
+              <video
+                key={video.socketId}
+                data-socket={video.socketId}
+                autoPlay
+                playsInline
+                ref={(videoElement) => {
+                  if (
+                    videoElement &&
+                    video.stream &&
+                    videoElement.srcObject !== video.stream
+                  ) {
+                    videoElement.srcObject = video.stream;
+                  }
+                }}
+              />
+            ))}
+          </div>
+
+          {/* My own video (round, bottom right) */}
+          <video
+            className={styles.meetUserVideo}
+            ref={localVideoRef}
+            autoPlay
+            muted
+            playsInline
+          />
+
+          {/* Buttons (bottom center) */}
+          <div className={styles.buttonContainers}>
+            <IconButton onClick={handleVideo} style={{ color: "white" }}>
+              {video === true ? <VideocamIcon /> : <VideocamOffIcon />}
+            </IconButton>
+
+            <IconButton onClick={goBack} style={{ color: "red" }}>
+              <CallEndIcon />
+            </IconButton>
+
+            <IconButton onClick={handleAudio} style={{ color: "white" }}>
+              {audio === true ? <MicIcon /> : <MicOffIcon />}
+            </IconButton>
+
+            {screenAvailable === true ? (
+              <IconButton onClick={handleScreen} style={{ color: "white" }}>
+                {screen === true ? (
+                  <ScreenShareIcon />
+                ) : (
+                  <StopScreenShareIcon />
+                )}
+              </IconButton>
+            ) : (
+              <></>
+            )}
+
+            <Badge badgeContent={newMessages} max={999} color="warning">
+              <IconButton style={{ color: "white" }}>
+                <ChatIcon />
+              </IconButton>
+            </Badge>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
