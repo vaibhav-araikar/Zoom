@@ -613,11 +613,26 @@ export default function VideoMeetComponent() {
       console.log(e);
     }
     window.localStream = stream;
+    // remember the screen stream so we can stop it when the button is clicked again
+    window.screenStream = stream;
     localVideoRef.current.srcObject = stream;
 
     for (let id in connections) {
       if (id === socketIdRef.current) continue;
-      connections[id].addTrack(stream.getVideoTracks()[0], stream);
+
+      // replace the existing video sender's track instead of adding a new one,
+      // so the remote side keeps the same stream and doesn't freeze afterwards
+      const screenTrack = stream.getVideoTracks()[0];
+      const videoSender = connections[id]
+        .getSenders()
+        .find((s) => s.track && s.track.kind === "video");
+
+      if (videoSender) {
+        videoSender.replaceTrack(screenTrack).catch((e) => console.log(e));
+      } else {
+        connections[id].addTrack(screenTrack, stream);
+      }
+
       connections[id]
         .createOffer()
         .then((description) => {
@@ -638,6 +653,10 @@ export default function VideoMeetComponent() {
     stream.getTracks().forEach(
       (track) =>
         (track.onended = () => {
+          // onended fires once per track; only handle it the first time
+          if (window.localStream !== stream) return;
+          window.screenStream = null;
+
           setScreen(false);
 
           try {
@@ -667,6 +686,12 @@ export default function VideoMeetComponent() {
           .catch((error) => {
             console.error("Error getting display media:", error);
           });
+      }
+    } else {
+      // button clicked again while sharing -> stop sharing and bring camera back
+      if (window.screenStream && window.localStream === window.screenStream) {
+        window.screenStream = null;
+        getUserMedia();
       }
     }
   };
@@ -863,9 +888,9 @@ export default function VideoMeetComponent() {
             {screenAvailable === true ? (
               <IconButton onClick={handleScreen} style={{ color: "white" }}>
                 {screen === true ? (
-                  <ScreenShareIcon />
-                ) : (
                   <StopScreenShareIcon />
+                ) : (
+                  <ScreenShareIcon />
                 )}
               </IconButton>
             ) : (
