@@ -860,7 +860,7 @@ export default function VideoMeetComponent() {
   // BACK / END CALL
   // =====================================
 
-  const goBack = () => {
+  const goBack = async () => {
     Object.keys(connections).forEach((id) => {
       connections[id].close();
       delete connections[id];
@@ -880,7 +880,27 @@ export default function VideoMeetComponent() {
     setMessages([]);
     setNewMessages(0);
 
+    // stop screen share (and any current stream) completely
+    if (window.localStream) {
+      window.localStream.getTracks().forEach((track) => {
+        track.onended = null; // so the screen-share "ended" handler doesn't run
+        track.stop();
+      });
+    }
+    window.screenStream = null;
+    window.localStream = null;
+    setScreen(false);
+
+    // go back to lobby with camera + mic on
+    setVideo(true);
+    setAudio(true);
     setAskForUsername(true);
+
+    // get a fresh camera/mic stream for the lobby preview
+    await getPermission();
+    if (localVideoRef.current && window.localStream) {
+      localVideoRef.current.srcObject = window.localStream;
+    }
   };
 
   // =====================================
