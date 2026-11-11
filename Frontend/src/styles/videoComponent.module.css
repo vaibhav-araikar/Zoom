@@ -56,4 +56,15 @@
   z-index: 10;
 }
 
-/* will start working on project from tomorroe */
+.chatRoom {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 300px;
+  height: 400px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  z-index: 10;
+}

@@ -71,6 +71,7 @@ export default function VideoMeetComponent() {
   const [username, setUsername] = useState("");
 
   const [newMessages, setNewMessages] = useState(0);
+  const [showModal, setShowModal] = useState(true);
 
   // Remote video list
   const [videos, setVideos] = useState([]);
@@ -606,6 +607,11 @@ export default function VideoMeetComponent() {
     setScreen(!screen);
   };
 
+  // Handle chat toggle
+  const handleChat = () => {
+    setShowModal(!showModal);
+  };
+
   let getDisplayMediaSuccess = (stream) => {
     try {
       window.localStream.getTracks().forEach((track) => track.stop());
@@ -871,6 +877,14 @@ export default function VideoMeetComponent() {
             playsInline
           />
 
+          {showModal ? (
+            <div className={styles.chatRoom}>
+              <div className={styles.chatContainer}>
+                <p>Chat Room</p>
+              </div>
+            </div>
+          ) : null}
+
           {/* Buttons (bottom center) */}
           <div className={styles.buttonContainers}>
             <IconButton onClick={handleVideo} style={{ color: "white" }}>
@@ -898,7 +912,7 @@ export default function VideoMeetComponent() {
             )}
 
             <Badge badgeContent={newMessages} max={999} color="warning">
-              <IconButton style={{ color: "white" }}>
+              <IconButton onClick={handleChat} style={{ color: "white" }}>
                 <ChatIcon />
               </IconButton>
             </Badge>
