@@ -115,7 +115,8 @@ export default function VideoMeetComponent() {
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
-        audio: true,
+        audio: audioConstraints,
+        // Use the defined audio constraints for better quality
       });
 
       console.log("Permission granted");
@@ -630,7 +631,7 @@ export default function VideoMeetComponent() {
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: video && videoAvailable,
-        audio: audio && audioAvailable,
+        audio: audio && audioAvailable ? audioConstraints : false,
       });
 
       console.log("New stream:", stream);
