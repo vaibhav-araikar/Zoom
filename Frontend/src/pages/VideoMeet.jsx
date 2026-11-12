@@ -13,6 +13,14 @@ import ChatIcon from "@mui/icons-material/Chat";
 import SendIcon from "@mui/icons-material/Send";
 import PersonIcon from "@mui/icons-material/Person";
 
+// Improve audio quality by enabling echo cancellation, noise suppression, and auto gain control
+const audioConstraints = {
+  echoCancellation: true,
+  noiseSuppression: true,
+  autoGainControl: true,
+  channelCount: 1,
+};
+
 // Backend Socket.IO server
 const server_url = "http://localhost:5000";
 
