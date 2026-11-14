@@ -1,48 +1,53 @@
 import React from "react";
-import "../App.css";
 import { Link } from "react-router-dom";
+import "./landing.css";
 
 export default function LandingPage() {
   return (
-    <div className="landingPageContainer">
-      {/* Navbar */}
-      <nav>
-        <div className="navHeader">
-          <h2>Air Video Call</h2>
-        </div>
+    <div className="lp">
+      <header className="lp-nav">
+        <Link to="/" className="lp-brand" aria-label="Air Video Call home">
+          <span className="lp-logo" aria-hidden="true" />
+          Air Video Call
+        </Link>
 
-        <div className="navList">
-          <p>Join as Guest</p>
-
-          <Link
-            to="/register"
-            style={{ textDecoration: "none", color: "inherit" }}
-          >
-            <p>Register</p>
+        <nav className="lp-links" aria-label="Main">
+          {/* Change this route to wherever your guest flow lives */}
+          <Link to="/guest" className="lp-link">
+            Join as guest
           </Link>
-
-          <Link to="/auth" style={{ textDecoration: "none", color: "inherit" }}>
-            <p>Login</p>
+          <Link to="/auth" className="lp-link">
+            Log in
           </Link>
-        </div>
-      </nav>
+          <Link to="/register" className="lp-btn lp-btn--small">
+            Register
+          </Link>
+        </nav>
+      </header>
 
-      {/* Main Page */}
-      <div className="landingMainContainer">
-        <div>
-          <h1>
-            <span style={{ color: "#ff9839" }}>Connect</span> with your loved
-            ones
-          </h1>
-          <p>Cover a distance by Air Video Call</p>
-          <div role="button">
-            <Link to="/auth">Get Started</Link>
+      <main className="lp-hero">
+        <div className="lp-copy">
+          <h1>Connect with your loved ones, wherever they are</h1>
+          <p className="lp-sub">
+            Start a video call in a few taps and close the distance between you
+            and the people you miss.
+          </p>
+
+          <div className="lp-actions">
+            <Link to="/auth" className="lp-btn">
+              Get started
+            </Link>
+            <Link to="/guest" className="lp-btn lp-btn--ghost">
+              Join as guest
+            </Link>
           </div>
         </div>
-        <div>
-          <img src="/mobile.png" alt="Mobile PNG" />
+
+        <div className="lp-visual">
+          <div className="lp-glow" aria-hidden="true" />
+          <img src="/mobile.png" alt="Air Video Call running on a phone" />
         </div>
-      </div>
+      </main>
     </div>
   );
 }
