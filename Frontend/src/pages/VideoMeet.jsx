@@ -307,6 +307,9 @@ export default function VideoMeetComponent() {
     // show unread badge only when chat is closed
     if (!showModalRef.current) {
       setNewMessages((prev) => prev + 1);
+      // prev + 1 is liye use kya kiya kyuki setState is asynchronous and prev state is needed to increment
+      // increment the unread message count only if the chat is closed
+      // increment is used to show the number of unread messages in the badge
     }
   };
 
