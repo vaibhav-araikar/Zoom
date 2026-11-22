@@ -7,7 +7,7 @@ function HomeComponent() {
   let roomId = "123456"; // Replace with actual room ID
 
   let handleJoinVideoCall = async () => {
-    await navigate(`${roomId}`);
+    await navigate(`${meetingCode}`);
   };
 
   return (
