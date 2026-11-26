@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "../App.css";
+import { IconButton } from "@mui/material";
+import { Restore } from "@mui/icons-material";
 
 function HomeComponent() {
   let navigate = useNavigate();
@@ -11,9 +15,34 @@ function HomeComponent() {
   };
 
   return (
-    <div>
-      <h1>Welcome to the Home Page</h1>
-    </div>
+    <>
+      <div className="navBar">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <h3>Air Video Call</h3>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <IconButton>
+            <Restore />
+          </IconButton>
+          <p>History</p>
+          <Button
+            onClick={() => {
+              localStorage.removeItem("token");
+              navigate("/login");
+            }}
+          >
+            Logout
+          </Button>
+        </div>
+      </div>
+    </>
   );
 }
 
