@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
-import { IconButton } from "@mui/material";
+import { IconButton, Button } from "@mui/material";
 import { Restore } from "@mui/icons-material";
+import withAuth from "../utils/withAuth";
 
 function HomeComponent() {
   let navigate = useNavigate();
@@ -54,4 +55,4 @@ function HomeComponent() {
   );
 }
 
-export default withAuth(Home);
+export default withAuth(HomeComponent);

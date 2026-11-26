@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router"; // or "next/navigation" for App Router
+import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode"; // npm i jwt-decode
 
 const isTokenValid = (token) => {
@@ -14,7 +14,7 @@ const isTokenValid = (token) => {
 
 const withAuth = (WrappedComponent) => {
   const AuthenticatedComponent = (props) => {
-    const router = useRouter();
+    const navigate = useNavigate();
     const [isChecking, setIsChecking] = useState(true);
 
     useEffect(() => {
@@ -22,11 +22,11 @@ const withAuth = (WrappedComponent) => {
 
       if (!token || !isTokenValid(token)) {
         localStorage.removeItem("token");
-        router.replace("/login");
+        navigate("/login", { replace: true });
       } else {
         setIsChecking(false);
       }
-    }, [router]);
+    }, [navigate]);
 
     if (isChecking) return null; // or a <Spinner />
 
