@@ -42,6 +42,14 @@ function HomeComponent() {
           </Button>
         </div>
       </div>
+
+      <div className="meetContainer">
+        <div className="leftPanel">
+          <div>
+            <h2>Providing Quality Video Calls</h2>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
