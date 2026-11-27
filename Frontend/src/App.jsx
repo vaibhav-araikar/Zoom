@@ -17,8 +17,8 @@ function App() {
           <Route path="/auth" element={<Authentication />}></Route>
           <Route path="/forgot-password" element={<ForgotPassword />}></Route>
           <Route path="/register" element={<SignUp />}></Route>
-          <Route path="/:url" element={<VideoMeetComponent />}></Route>
           <Route path="/home" element={<HomeComponent />}></Route>
+          <Route path="/:url" element={<VideoMeetComponent />}></Route>
           {/* when we will go to http://localhost:5173/abc the video component page will get opened */}
         </Routes>
       </AuthProvider>
