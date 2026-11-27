@@ -54,11 +54,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const getUserHistory = async (token) => {
+    try {
+      let request = await clientUrl.get("/get_user_history", {
+        params: { token: localStorage.getItem("token") },
+      });
+      return request.data;
+    } catch (error) {
+      console.error("Get User History API error:", error);
+      throw error;
+    }
+  };
+
+  const addToUserHistory = async (meetingCode) => {
+    try {
+      const request = await clientUrl.post("/add_to_history", {
+        token: localStorage.getItem("token"),
+        meeting_code: meetingCode,
+      });
+      return request.data;
+    } catch (error) {
+      console.error("Add to User History API error:", error);
+      throw error;
+    }
+  };
+
   const data = {
     userData,
     setUserData,
     handleRegister,
     handleLogin,
+    getUserHistory,
+    addToUserHistory,
   };
 
   return <AuthContext.Provider value={data}>{children}</AuthContext.Provider>;

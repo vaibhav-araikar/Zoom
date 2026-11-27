@@ -2,6 +2,7 @@ import httpStatus from "http-status";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { User } from "../models/user.model.js";
+import { Meeting } from "../models/meeting.model.js";
 
 // Register a new user
 const register = async (req, res) => {
@@ -95,12 +96,10 @@ const addToActivity = async (req, res) => {
     user.activity.push(activity);
     await user.save();
 
-    return res
-      .status(httpStatus.OK)
-      .json({
-        message: "Activity added successfully",
-        activity: user.activity,
-      });
+    return res.status(httpStatus.OK).json({
+      message: "Activity added successfully",
+      activity: user.activity,
+    });
   } catch (error) {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: `Error occurred while adding activity: ${error.message}`,
@@ -134,4 +133,44 @@ const getAllActivity = async (req, res) => {
   }
 };
 
-export { register, login, addToActivity, getAllActivity };
+const getUserHistory = async (req, res) => {
+  const { token } = req.query;
+
+  try {
+    const user = await User.findOne({ token: token });
+    const meetings = await Meeting.find({ user_id: user.username });
+    res.json(meetings);
+  } catch (error) {
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: `Error occurred while fetching user history: ${error.message}`,
+    });
+  }
+};
+
+const addToHistory = async (req, res) => {
+  const { token, meetingCode } = req.body;
+
+  try {
+    const user = await User.findOne({ token: token });
+    const newMeeting = new Meeting({
+      user_id: user.username,
+      meeting_code: meetingCode,
+    });
+    await newMeeting.save();
+    res.json(newMeeting);
+    res.status(httpStatus.OK).json({ message: "Meeting added to history" });
+  } catch (error) {
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: `Error occurred while adding to history: ${error.message}`,
+    });
+  }
+};
+
+export {
+  register,
+  login,
+  addToActivity,
+  getAllActivity,
+  getUserHistory,
+  addToHistory,
+};

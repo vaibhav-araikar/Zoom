@@ -9,11 +9,22 @@ function HomeComponent() {
   let navigate = useNavigate();
   const [meetingCode, setMeetingCode] = useState("");
 
-  let roomId = "123456"; // Replace with actual room ID
+  // let roomId = "123456"; // Replace with actual room ID
+
+  const { addToUserHistory } = React.useContext(AuthContext);
 
   let handleJoinVideoCall = async () => {
-    await navigate(`${meetingCode}`);
+    try {
+      await addToUserHistory(meetingCode);
+      await navigate(`${meetingCode}`);
+    } catch (error) {
+      console.error("Error adding to user history:", error);
+    }
   };
+
+  // let handleJoinVideoCall = async () => {
+  //   await navigate(`${meetingCode}`);
+  // };
 
   return (
     <>
