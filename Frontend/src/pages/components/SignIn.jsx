@@ -1,28 +1,47 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-
+import { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../contexts/AuthContext";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 export default function SignInCard() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [password, setPassword] = useState();
-  const [userName, setUserName] = useState();
-  const [error, setError] = useState();
-  const [name, setName] = useState();
-  const [messages, setMessages] = useState();
+  const [password, setPassword] = useState("");
+  const [userName, setUserName] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const [formState, setFormState] = useState(0);
+  const { handleLogin } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  // snackbar is open or not
-  const [open, setOpen] = useState(false);
-
-  const handleSubmit = (e) => {
+  // Login form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("Login submitted");
-    console.log("Remember me:", rememberMe);
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await handleLogin(userName, password);
+
+      if (!response?.token) {
+        throw new Error("Login token not received");
+      }
+
+      console.log("Login successful");
+      console.log("Token stored:", !!localStorage.getItem("token"));
+
+      navigate("/home");
+    } catch (error) {
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Login failed. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -62,6 +81,9 @@ export default function SignInCard() {
               id="email"
               type="email"
               placeholder="your@email.com"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+              autoComplete="username"
               required
             />
           </div>
@@ -78,6 +100,9 @@ export default function SignInCard() {
               id="password"
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
               required
             />
 
@@ -91,6 +116,19 @@ export default function SignInCard() {
           </div>
         </div>
 
+        {/* Error message */}
+        {error && (
+          <p
+            style={{
+              color: "#ff4d4f",
+              fontSize: "14px",
+              margin: "10px 0",
+            }}
+          >
+            {error}
+          </p>
+        )}
+
         {/* Remember / Forgot */}
         <div className="options-row">
           <label className="remember">
@@ -103,15 +141,16 @@ export default function SignInCard() {
             <span>Remember me</span>
           </label>
 
-          {/* Forgot Password */}
           <Link to="/forgot-password" className="forgot-password-link">
             Forgot password?
           </Link>
         </div>
 
         {/* Sign in */}
-        <button type="submit" className="signin-button">
-          <span className="signin-text">SIGN IN</span>
+        <button type="submit" className="signin-button" disabled={loading}>
+          <span className="signin-text">
+            {loading ? "SIGNING IN..." : "SIGN IN"}
+          </span>
 
           <span className="signin-arrow">→</span>
         </button>
