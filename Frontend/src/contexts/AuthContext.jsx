@@ -116,8 +116,27 @@ export const AuthProvider = ({ children }) => {
   };
 
   // User ko logout karna
-  const handleLogout = () => {
+  // User ko logout karna
+  const handleLogout = async () => {
+    const token = localStorage.getItem("token");
+
+    // Backend se token remove karna
+    if (token) {
+      await clientUrl.post(
+        "/logout",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+    }
+
+    // Browser se token remove karna
     localStorage.removeItem("token");
+
+    // Authentication state clear karna
     setUserData(null);
     setAuthError("");
   };

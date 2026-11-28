@@ -107,10 +107,19 @@ function HomeComponent() {
   };
 
   // Logout the current user
-  const logoutUser = () => {
-    closeProfileMenu();
-    handleLogout();
-    navigate("/auth", { replace: true });
+  // Logout the current user
+  const logoutUser = async () => {
+    try {
+      await handleLogout();
+
+      closeProfileMenu();
+
+      navigate("/auth", { replace: true });
+    } catch (error) {
+      console.error("Logout failed:", error.message);
+
+      alert("Unable to logout. Please try again.");
+    }
   };
 
   // Profile menu open karna

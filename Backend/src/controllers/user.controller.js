@@ -249,6 +249,41 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
+// Logout the currently logged in user
+const logout = async (req, res) => {
+  const authorization = req.headers.authorization;
+
+  // Check whether token is available
+  if (!authorization || !authorization.startsWith("Bearer ")) {
+    return res.status(httpStatus.UNAUTHORIZED).json({
+      message: "Token is required",
+    });
+  }
+
+  const token = authorization.slice(7).trim();
+
+  if (!token) {
+    return res.status(httpStatus.UNAUTHORIZED).json({
+      message: "Token is required",
+    });
+  }
+
+  try {
+    // Remove the token from MongoDB
+    await User.updateOne({ token }, { $unset: { token: "" } });
+
+    return res.status(httpStatus.OK).json({
+      message: "Logout successful",
+    });
+  } catch (error) {
+    console.error("Logout error:", error.message);
+
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "Unable to logout",
+    });
+  }
+};
+
 export {
   register,
   login,
@@ -257,4 +292,5 @@ export {
   getUserHistory,
   addToHistory,
   getCurrentUser,
+  logout,
 };
