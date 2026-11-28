@@ -205,6 +205,50 @@ const addToHistory = async (req, res) => {
   }
 };
 
+// Get currently logged in user details
+const getCurrentUser = async (req, res) => {
+  const authorization = req.headers.authorization;
+
+  // Check whether token is available or not
+  if (!authorization || !authorization.startsWith("Bearer ")) {
+    return res.status(httpStatus.UNAUTHORIZED).json({
+      message: "Token is required",
+    });
+  }
+
+  const token = authorization.slice(7).trim();
+
+  if (!token) {
+    return res.status(httpStatus.UNAUTHORIZED).json({
+      message: "Token is required",
+    });
+  }
+
+  try {
+    // Find user using the login token
+    const user = await User.findOne({ token }).select("_id name username");
+
+    // Check whether user exists or not
+    if (!user) {
+      return res.status(httpStatus.UNAUTHORIZED).json({
+        message: "Invalid token",
+      });
+    }
+
+    // Return logged in user details
+    return res.status(httpStatus.OK).json({
+      message: "User authenticated successfully",
+      user: user,
+    });
+  } catch (error) {
+    console.error("Error verifying user:", error.message);
+
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "Error fetching user details",
+    });
+  }
+};
+
 export {
   register,
   login,
@@ -212,4 +256,5 @@ export {
   getAllActivity,
   getUserHistory,
   addToHistory,
+  getCurrentUser,
 };

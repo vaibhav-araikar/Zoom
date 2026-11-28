@@ -6,27 +6,36 @@ const meetingSchema = new Schema({
     type: String,
     required: true,
   },
+
+  // Meeting code numbers aur letters dono ho sakte hai
   meeting_code: {
-    type: Number,
+    type: String,
     required: true,
+    trim: true,
   },
+
+  // Automatically current date aur time store hoga
   date: {
     type: Date,
     required: true,
-    defult: Date.now,
+    default: Date.now,
   },
+
+  // Date already time store karti hai, isliye ye optional hai
   time: {
     type: String,
-    required: true,
   },
+
+  // Initially participants ki list empty hogi
   participants: {
     type: [String],
-    required: true,
+    default: [],
   },
+
+  // Meeting create karne wale user ki ID
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
   },
 });
 

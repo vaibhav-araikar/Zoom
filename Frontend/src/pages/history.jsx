@@ -68,7 +68,7 @@ export default function History() {
           <Card key={meeting._id} variant="outlined">
             <CardContent>
               <p>Meeting Code: {meeting.meeting_code}</p>
-              <p>Date: {new Date(meeting.createdAt).toLocaleString()}</p>
+              <p>Date: {new Date(meeting.date).toLocaleString()}</p>
             </CardContent>
           </Card>
         ))}

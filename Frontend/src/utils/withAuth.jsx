@@ -1,55 +1,25 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useContext } from "react";
+import { Navigate } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
 const withAuth = (WrappedComponent) => {
   const AuthenticatedComponent = (props) => {
-    const navigate = useNavigate();
-    const [isChecking, setIsChecking] = useState(true);
-    const [error, setError] = useState("");
+    const { isAuthenticated, isChecking, authError } = useContext(AuthContext);
 
-    useEffect(() => {
-      let cancelled = false;
+    // Authentication check complete hone ka wait karna
+    if (isChecking) return null; // or a <Spinner />
 
-      const checkAuth = async () => {
-        const token = localStorage.getItem("token");
+    // Server connection mein problem hone par
+    if (authError) {
+      return <p>{authError}</p>;
+    }
 
-        if (!token) {
-          navigate("/auth", { replace: true });
-          return;
-        }
+    // Agar user logged in nahi hai toh login page par bhejo
+    if (!isAuthenticated) {
+      return <Navigate to="/auth" replace />;
+    }
 
-        try {
-          await axios.get("http://localhost:5000/api/v1/users/history", {
-            params: { token },
-          });
-
-          if (!cancelled) {
-            setIsChecking(false);
-          }
-        } catch (error) {
-          if (cancelled) return;
-
-          if (error.response?.status === 401) {
-            localStorage.removeItem("token");
-            navigate("/auth", { replace: true });
-          } else {
-            setError("Unable to verify login. Please refresh.");
-          }
-        }
-      };
-
-      checkAuth();
-
-      return () => {
-        cancelled = true;
-      };
-    }, [navigate]);
-
-    if (error) return <p>{error}</p>;
-
-    if (isChecking) return null;
-
+    // Agar user logged in hai toh component show karo
     return <WrappedComponent {...props} />;
   };
 
