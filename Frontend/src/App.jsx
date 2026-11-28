@@ -7,6 +7,7 @@ import SignUp from "./pages/components/SignUp";
 import { AuthProvider } from "./contexts/AuthContext";
 import VideoMeetComponent from "./pages/VideoMeet";
 import HomeComponent from "./pages/home";
+import History from "./pages/history";
 
 function App() {
   return (
@@ -18,6 +19,8 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />}></Route>
           <Route path="/register" element={<SignUp />}></Route>
           <Route path="/home" element={<HomeComponent />}></Route>
+          <Route path="/login" element={<Authentication />}></Route>
+          <Route path="/history" element={<History />}></Route>
           <Route path="/:url" element={<VideoMeetComponent />}></Route>
           {/* when we will go to http://localhost:5173/abc the video component page will get opened */}
         </Routes>

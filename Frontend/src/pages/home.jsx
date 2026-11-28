@@ -4,6 +4,7 @@ import "../App.css";
 import { IconButton, Button, TextField } from "@mui/material";
 import { Restore } from "@mui/icons-material";
 import withAuth from "../utils/withAuth";
+import { AuthContext } from "../contexts/AuthContext";
 
 function HomeComponent() {
   let navigate = useNavigate();
